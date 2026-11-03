@@ -3,154 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lật & Xoay Ảnh</title>
+<title>Lật ảnh, xoay ảnh online miễn phí | Kropix</title>
+<meta name="description" content="Lật ảnh trái phải, trên dưới và xoay ảnh 90°, 180° online miễn phí. Xem trước ngay trên trình duyệt rồi tải ảnh về, không cần cài phần mềm.">
 <style>
-  :root{
-    --ink:#1c1a17;
-    --paper:#f6f2ea;
-    --line:#d9d0c1;
-    --accent:#b5502f;
-    --accent-ink:#fff8ef;
-    --panel:#efe9dd;
+  :root {
+    --bg: #16171a;
+    --panel: #1e2024;
+    --panel-2: #26282f;
+    --line: #2c2e33;
+    --text: #e7e6e2;
+    --text-dim: #8b8d92;
+    --accent: #e8a33d;
+    --accent-ink: #201603;
   }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Courier New', ui-monospace, monospace;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    padding:32px 16px 60px;
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 24px 80px;
   }
-  h1{
-    font-size:20px;
-    letter-spacing:2px;
-    text-transform:uppercase;
-    margin:0 0 4px;
-    border-bottom:2px solid var(--ink);
-    padding-bottom:10px;
-    width:100%;
-    max-width:560px;
-    text-align:center;
+
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
   }
-  .sub{
-    font-size:12px;
-    color:#6b6154;
-    margin-bottom:24px;
-    text-align:center;
+
+  .sub {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+    text-align: center;
+    max-width: 560px;
   }
-  .stage-wrap{
-    width:100%;
-    max-width:560px;
-    background:var(--panel);
-    border:1px solid var(--line);
-    padding:16px;
+
+  .stage-wrap {
+    width: 100%;
+    max-width: 560px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px;
   }
-  .stage{
-    width:100%;
-    aspect-ratio:4/3;
+
+  .stage {
+    width: 100%;
+    aspect-ratio: 4/3;
     background:
-      linear-gradient(45deg,#e2dbca 25%,transparent 25%) -10px 0/20px 20px,
-      linear-gradient(-45deg,#e2dbca 25%,transparent 25%) -10px 0/20px 20px,
-      linear-gradient(45deg,transparent 75%,#e2dbca 75%) -10px 0/20px 20px,
-      linear-gradient(-45deg,transparent 75%,#e2dbca 75%) -10px 0/20px 20px;
-    background-color:#fbf9f4;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    position:relative;
+      linear-gradient(45deg, #20222a 25%, transparent 25%) -10px 0/20px 20px,
+      linear-gradient(-45deg, #20222a 25%, transparent 25%) -10px 0/20px 20px,
+      linear-gradient(45deg, transparent 75%, #20222a 75%) -10px 0/20px 20px,
+      linear-gradient(-45deg, transparent 75%, #20222a 75%) -10px 0/20px 20px;
+    background-color: #1a1c21;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
   }
-  .stage img{
-    max-width:100%;
-    max-height:100%;
-    transition:transform .25s ease;
-    user-select:none;
-    -webkit-user-drag:none;
-  }
-  .placeholder{
-    font-size:12px;
-    color:#9a8f7c;
-    text-align:center;
-    padding:20px;
-    line-height:1.6;
-  }
-  .drop-hint{
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:1px;
-  }
-  input[type=file]{ display:none; }
 
-  .controls{
-    width:100%;
-    max-width:560px;
-    margin-top:14px;
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:8px;
+  .stage img {
+    max-width: 100%;
+    max-height: 100%;
+    transition: transform 0.25s ease;
+    user-select: none;
+    -webkit-user-drag: none;
   }
-  button{
-    font-family:inherit;
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.5px;
-    background:var(--ink);
-    color:var(--accent-ink);
-    border:none;
-    padding:12px 6px;
-    cursor:pointer;
-    transition:background .15s ease, transform .1s ease;
-  }
-  button:hover{ background:var(--accent); }
-  button:active{ transform:scale(.96); }
-  button.wide{ grid-column:span 2; }
-  button.ghost{
-    background:transparent;
-    color:var(--ink);
-    border:1px solid var(--ink);
-  }
-  button.ghost:hover{ background:var(--ink); color:var(--accent-ink); }
-  button.load{
-    grid-column:span 4;
-    background:var(--accent);
-    color:var(--accent-ink);
-    padding:14px;
-  }
-  button.load:hover{ background:#8f3d22; }
-  button:disabled{
-    opacity:.35;
-    cursor:not-allowed;
-  }
-  button:disabled:hover{ background:var(--ink); }
 
-  .readout{
-    width:100%;
-    max-width:560px;
-    margin-top:14px;
-    font-size:11px;
-    color:#6b6154;
-    display:flex;
-    justify-content:space-between;
-    border-top:1px dashed var(--line);
-    padding-top:10px;
+  .placeholder {
+    font-size: 13px;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 20px;
+    line-height: 1.6;
   }
-  .footer-actions{
-    width:100%;
-    max-width:560px;
-    margin-top:8px;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
+
+  .drop-hint { font-size: 12px; }
+
+  input[type=file] { display: none; }
+
+  .controls {
+    width: 100%;
+    max-width: 560px;
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 11px 8px;
+    border-radius: 7px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  button:hover { border-color: var(--text-dim); }
+  button:active { transform: scale(0.97); }
+  button.wide { grid-column: span 2; }
+  button.ghost { color: var(--text-dim); }
+
+  button.load {
+    grid-column: span 4;
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600;
+    padding: 12px;
+  }
+
+  button.load:hover { opacity: 0.92; border-color: var(--accent); }
+
+  button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .readout {
+    width: 100%;
+    max-width: 560px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .footer-actions {
+    width: 100%;
+    max-width: 560px;
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 </style>
 </head>
 <body>
 
-<h1>Lật &amp; Xoay Ảnh</h1>
+<h1>Lật &amp; xoay ảnh online miễn phí</h1>
 <div class="sub">Flip and rotate tool (công cụ lật &amp; xoay ảnh) — xử lý ngay trên trình duyệt, không tải lên máy chủ</div>
 
 <div class="stage-wrap">

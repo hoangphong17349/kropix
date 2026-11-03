@@ -1,81 +1,306 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pixora</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Công cụ ảnh online miễn phí: nén, cắt, xóa nền | Kropix</title>
+<meta name="description" content="Bộ công cụ ảnh online miễn phí: nén ảnh, cắt ảnh, xóa nền, ghép ảnh, đổi kích thước, chuyển định dạng. Dùng ngay trên trình duyệt, không cần cài phần mềm.">
+<style>
+  :root {
+    --bg: #16171a;
+    --panel: #1e2024;
+    --panel-2: #26282f;
+    --line: #2c2e33;
+    --text: #e7e6e2;
+    --text-dim: #8b8d92;
+    --accent: #e8a33d;
+    --accent-ink: #201603;
+  }
 
-    <style>
-        /* Laptop */
-        h1 {
-            font-size: 32px;
-            color: black;
-        }
+  * { box-sizing: border-box; }
 
-        ul {
-            font-size: 20px;
-        }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+  }
 
-        a {
-            color: blue;
-        }
+  .app {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
 
-        /* Điện thoại */
-        @media screen and (max-width: 1000px) {
-            h1 {
-                font-size: 24px;
-                color: orange;
-            }
+  header { margin-bottom: 24px; }
 
-            ul {
-                font-size: 16px;
-            }
+  .brand {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
 
-            a {
-                color: orange;
-            }
-        }
-    </style>
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin: 0;
+  }
+
+  /* Nút bắt đầu sửa ảnh -> tool.html */
+  .start-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 16px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: opacity 0.15s ease, transform 0.05s ease;
+    margin-bottom: 28px;
+  }
+
+  .start-btn:hover { opacity: 0.92; }
+  .start-btn:active { transform: scale(0.995); }
+
+  .start-btn .start-desc {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    opacity: 0.75;
+    margin-top: 2px;
+  }
+
+  .start-btn .start-text {
+    text-align: left;
+    line-height: 1.3;
+  }
+
+  .start-btn .start-icon {
+    font-size: 22px;
+    flex: none;
+  }
+
+  .start-btn .start-arrow {
+    margin-left: auto;
+    font-size: 18px;
+    flex: none;
+  }
+
+  /* Nhãn phân vùng */
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .tool-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) {
+    .tool-list { grid-template-columns: 1fr; }
+  }
+
+  .tool-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    text-decoration: none;
+    color: var(--text);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .tool-card:hover {
+    border-color: var(--accent);
+    background: rgba(232, 163, 61, 0.06);
+  }
+
+  .tool-icon {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .tool-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .tool-desc {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  footer {
+    margin-top: 36px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+</style>
 </head>
 <body>
 
-    <h1>Công cụ xử lý ảnh</h1>
+<div class="app">
 
-    <ul>
-        <li>
-            <a href="cat-anh.html">Cắt ảnh (image cropping)</a>
-        </li>
-        <li>
-            <a href="doi-dinh-dang-anh.html">Chuyển định dạng ảnh (image format conversion)</a>
-        </li>
-        <li>
-            <a href="ghep-anh-theo-mau.html">Ghép ảnh theo khung mẫu</a>
-        </li>
-        <li>
-            <a href="lat-anh.html">Lật ảnh</a>
-        </li>
-        <li>
-            <a href="xoa-nen-anh.html">Xóa nền ảnh</a>
-        </li>
-        <li>
-            <a href="magic-brush.html">Magic brush (xóa nền ảnh bằng nét cọ)</a>
-        </li>
-        <li>
-            <a href="tuong-phan_do-sang_bao-hoa.html">Độ bão hòa, tương phản, độ sáng</a>
-        </li>
-        <li>
-            <a href="danh-dau-len-anh.html">Đánh dấu lên ảnh</a>
-        </li>
-        <li>
-            <a href="them-chu.html">Thêm chữ lên ảnh</a>
-        </li>
-        <li>
-            <a href="doi-kich-thuoc-anh.html">Đổi kích thước (pixel) ảnh</a>
-        </li>
-        <li>
-            <a href="nen-anh.html">Nén ảnh (giảm dung lượng ảnh)</a>
-        </li>
-    </ul>
+  <header>
+    <div class="brand">Kropix</div>
+    <h1>Bộ công cụ xử lý ảnh online miễn phí</h1>
+    <p>Nén, cắt, ghép, xóa nền, đổi kích thước và chỉnh sửa ảnh ngay trên trình duyệt, không cần cài phần mềm.</p>
+  </header>
+
+  <!-- Nút bắt đầu sửa ảnh: dẫn sang tool.html -->
+  <a class="start-btn" href="tool.html">
+    <span class="start-icon">🚀</span>
+    <span class="start-text">
+      Bắt đầu sửa ảnh
+      <span class="start-desc">Mở trình chỉnh sửa tổng hợp — tất cả công cụ trong một trang</span>
+    </span>
+    <span class="start-arrow">→</span>
+  </a>
+
+  <h2 class="section-label">Tất cả công cụ ảnh</h2>
+
+  <div class="tool-list">
+
+    <a class="tool-card" href="cat-anh.html">
+      <span class="tool-icon">✂️</span>
+      <span>
+        <span class="tool-name">Cắt ảnh</span><br>
+        <span class="tool-desc">Cắt ảnh online theo khung tự chọn</span>
+      </span>
+    </a>
+
+    <a class="tool-card" href="doi-dinh-dang-anh.html">
+      <span class="tool-icon">🔄</span>
+      <span>
+        <span class="tool-name">Chuyển định dạng ảnh</span><br>
+        <span class="tool-desc">Chuyển ảnh sang định dạng khác</span>
+      </span>
+    </a>
+
+    <a class="tool-card" href="ghep-anh-theo-mau.html">
+      <span class="tool-icon">🖼️</span>
+      <span>
+        <span class="tool-name">Ghép ảnh theo khung mẫu</span><br>
+        <span class="tool-desc">Ghép nhiều ảnh theo khung mẫu</span>
+      </span>
+    </a>
+
+    <a class="tool-card" href="lat-anh.html">
+      <span class="tool-icon">⇋</span>
+      <span>
+        <span class="tool-name">Lật ảnh</span><br>
+        <span class="tool-desc">Lật và xoay ảnh online</span>
+      </span>
+    </a>
+
+    <a class="tool-card" href="xoa-nen-anh.html">
+      <span class="tool-icon">🪄</span>
+      <span>
+        <span class="tool-name">Xóa nền ảnh</span><br>
+        <span class="tool-desc">Xóa phông nền ảnh</span>
+      </span>
+    </a>
+
+    <a class="tool-card" href="magic-brush.html">
+      <span class="tool-icon">🖌️</span>
+      <span>
+        <span class="tool-name">Magic Brush</span><br>
+        <span class="tool-desc">xóa nền ảnh bằng nét cọ</span>
+      </span>
+    </a>
+
+    <a class="tool-card" href="tuong-phan_do-sang_bao-hoa.html">
+      <span class="tool-icon">🌗</span>
+      <span>
+        <span class="tool-name">Tương phản, độ sáng, độ bão hòa</span><br>
+        <span class="tool-desc">Chỉnh nhanh màu sắc ảnh</span>
+      </span>
+    </a>
+
+    <a class="tool-card" href="danh-dau-len-anh.html">
+      <span class="tool-icon">🖊️</span>
+      <span>
+        <span class="tool-name">Đánh dấu lên ảnh</span><br>
+        <span class="tool-desc">Vẽ bằng bút, xóa bằng tẩy</span>
+      </span>
+    </a>
+
+    <a class="tool-card" href="them-chu.html">
+      <span class="tool-icon">🔤</span>
+      <span>
+        <span class="tool-name">Thêm chữ lên ảnh</span><br>
+        <span class="tool-desc">Chèn chữ vào ảnh</span>
+      </span>
+    </a>
+
+    <a class="tool-card" href="doi-kich-thuoc-anh.html">
+      <span class="tool-icon">📐</span>
+      <span>
+        <span class="tool-name">Đổi kích thước (pixel) ảnh</span><br>
+        <span class="tool-desc">Đổi chiều rộng, chiều cao ảnh</span>
+      </span>
+    </a>
+
+    <a class="tool-card" href="nen-anh.html">
+      <span class="tool-icon">🗜️</span>
+      <span>
+        <span class="tool-name">Nén ảnh</span><br>
+        <span class="tool-desc">Giảm dung lượng ảnh online</span>
+      </span>
+    </a>
+
+  </div>
+
+  <footer>Kropix — bộ công cụ ảnh online miễn phí.</footer>
+
+</div>
 
 </body>
 </html>

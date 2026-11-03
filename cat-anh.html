@@ -3,443 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công Cụ Cắt Ảnh</title>
+    <title>Cắt ảnh online miễn phí, không cần cài phần mềm | Kropix</title>
+    <meta name="description" content="Cắt ảnh online miễn phí: kéo khung chọn vùng cần giữ rồi tải về ngay. Dùng trên trình duyệt, không cần cài phần mềm hay đăng ký.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  :root {
+    --bg: #16171a;
+    --panel: #1e2024;
+    --panel-2: #26282f;
+    --line: #2c2e33;
+    --text: #e7e6e2;
+    --text-dim: #8b8d92;
+    --accent: #e8a33d;
+    --accent-ink: #201603;
+  }
 
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #ec4899;
-            --background: #0f172a;
-            --surface: #1e293b;
-            --surface-light: #334155;
-            --text: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border: rgba(148, 163, 184, 0.2);
-            --success: #10b981;
-            --shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-        }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--background);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 2rem 1rem;
-            position: relative;
-            overflow-x: hidden;
-        }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 40%);
-            animation: glow 20s ease-in-out infinite;
-            pointer-events: none;
-        }
+  .container { max-width: 1080px; margin: 0 auto; }
 
-        @keyframes glow {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(5%, 5%) rotate(180deg); }
-        }
+  header { margin-bottom: 32px; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
 
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
-            animation: fadeInDown 0.8s ease;
-        }
+  .subtitle { color: var(--text-dim); font-size: 14px; }
 
-        h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
-        }
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
 
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            font-weight: 300;
-            letter-spacing: 0.05em;
-        }
+  @media (max-width: 760px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
 
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 2rem;
-            animation: fadeInUp 0.8s ease 0.2s both;
-        }
+  .image-section,
+  .controls {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
 
-        .image-section {
-            background: var(--surface);
-            border-radius: 20px;
-            padding: 2rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-        }
+  .image-section {
+    padding: 14px;
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
 
-        .image-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--primary), transparent);
-            opacity: 0.5;
-        }
+  .controls {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-self: start;
+  }
 
-        .upload-area {
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            padding: 3rem 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(99, 102, 241, 0.03);
-            position: relative;
-        }
+  .upload-area {
+    width: 100%;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    color: var(--text-dim);
+  }
 
-        .upload-area:hover {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.08);
-            transform: translateY(-2px);
-        }
+  .upload-area:hover { border-color: var(--accent); color: var(--text); }
+  .upload-area.has-image { display: none; }
 
-        .upload-area.has-image {
-            display: none;
-        }
+  .upload-icon { font-size: 34px; margin-bottom: 12px; opacity: 0.7; }
+  .upload-text { font-size: 15px; color: var(--text); margin-bottom: 6px; }
+  .upload-hint { font-size: 13px; }
 
-        .upload-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.7;
-        }
+  #fileInput { display: none; }
 
-        .upload-text {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: var(--text);
-        }
+  .image-wrapper { display: none; width: 100%; }
+  .image-wrapper.active { display: block; }
 
-        .upload-hint {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
+  #image {
+    max-width: 100%;
+    max-height: 560px;
+    display: block;
+    border-radius: 6px;
+    margin: 0 auto;
+  }
 
-        #fileInput {
-            display: none;
-        }
+  .control-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 2px;
+  }
 
-        .image-wrapper {
-            display: none;
-            max-width: 100%;
-        }
+  .btn {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text);
+    transition: border-color 0.15s ease, opacity 0.15s ease;
+  }
 
-        .image-wrapper.active {
-            display: block;
-        }
+  .btn:hover { border-color: var(--text-dim); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-        #image {
-            max-width: 100%;
-            max-height: 600px;
-            display: block;
-            border-radius: 12px;
-        }
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
 
-        .controls {
-            background: var(--surface);
-            border-radius: 20px;
-            padding: 2rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
+  .btn-primary:hover { border-color: var(--accent); opacity: 0.92; }
+  .btn-secondary { color: var(--text-dim); }
 
-        .control-group {
-            animation: slideInRight 0.5s ease both;
-        }
+  .result-section { display: none; margin-top: 24px; }
+  .result-section.active { display: block; }
 
-        .control-group:nth-child(1) { animation-delay: 0.3s; }
-        .control-group:nth-child(2) { animation-delay: 0.4s; }
-        .control-group:nth-child(3) { animation-delay: 0.5s; }
+  .result-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
 
-        .control-title {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-            font-weight: 500;
-        }
+  .result-content {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
 
-        .btn {
-            width: 100%;
-            padding: 1rem 1.5rem;
-            border: none;
-            border-radius: 12px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
+  .result-content img {
+    max-width: 100%;
+    max-height: 560px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+  }
 
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
+  .download-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    text-decoration: none;
+    border-radius: 7px;
+    font-weight: 600;
+    font-size: 13.5px;
+    transition: opacity 0.15s ease;
+  }
 
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
+  .download-link:hover { opacity: 0.92; }
 
-        .btn span {
-            position: relative;
-            z-index: 1;
-        }
+  .stats {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 4px 14px;
+    margin-top: 12px;
+    text-align: left;
+  }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
-        }
+  .stat-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
 
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
-        }
+  .stat-item:last-child { border-bottom: none; }
+  .stat-label { color: var(--text-dim); }
+  .stat-value { font-weight: 600; font-variant-numeric: tabular-nums; }
 
-        .btn-primary:active {
-            transform: translateY(-1px);
-        }
+  /* Custom Cropper.js styling */
+  .cropper-view-box,
+  .cropper-face { background: rgba(232, 163, 61, 0.08); }
 
-        .btn-secondary {
-            background: var(--surface-light);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
+  .cropper-line,
+  .cropper-point { background-color: var(--accent); }
 
-        .btn-secondary:hover {
-            background: var(--surface);
-            border-color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .result-section {
-            margin-top: 3rem;
-            display: none;
-            animation: fadeInUp 0.8s ease;
-        }
-
-        .result-section.active {
-            display: block;
-        }
-
-        .result-title {
-            text-align: center;
-            font-size: 1.5rem;
-            margin-bottom: 2rem;
-            color: var(--text);
-            font-weight: 600;
-        }
-
-        .result-content {
-            background: var(--surface);
-            border-radius: 20px;
-            padding: 2rem;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            text-align: center;
-        }
-
-        .result-content img {
-            max-width: 100%;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .download-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            background: var(--success);
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .download-link:hover {
-            background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-        }
-
-        .stats {
-            background: var(--surface-light);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-top: 1rem;
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
-        }
-
-        .stat-item:last-child {
-            border-bottom: none;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-        }
-
-        .stat-value {
-            color: var(--text);
-            font-weight: 600;
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 2.5rem;
-            }
-        }
-
-        @media (max-width: 640px) {
-            body {
-                padding: 1rem 0.5rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .image-section,
-            .controls,
-            .result-content {
-                padding: 1.5rem;
-            }
-        }
-
-        /* Custom Cropper.js styling */
-        .cropper-view-box,
-        .cropper-face {
-            background: rgba(99, 102, 241, 0.1);
-        }
-
-        .cropper-line,
-        .cropper-point {
-            background-color: var(--primary);
-        }
-
-        .cropper-point {
-            width: 8px;
-            height: 8px;
-            opacity: 0.8;
-        }
-
-        .cropper-point.point-se {
-            width: 12px;
-            height: 12px;
-        }
-    </style>
+  .cropper-point { width: 8px; height: 8px; opacity: 0.8; }
+  .cropper-point.point-se { width: 12px; height: 12px; }
+</style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>✂️ Cắt Ảnh</h1>
+            <h1>✂️ Cắt ảnh online miễn phí</h1>
             <p class="subtitle">Công cụ chỉnh sửa ảnh chuyên nghiệp</p>
         </header>
 
@@ -515,8 +298,8 @@
         // Drag and drop
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = 'var(--primary)';
-            uploadArea.style.background = 'rgba(99, 102, 241, 0.12)';
+            uploadArea.style.borderColor = 'var(--accent)';
+            uploadArea.style.background = 'rgba(232, 163, 61, 0.12)';
         });
 
         uploadArea.addEventListener('dragleave', () => {
