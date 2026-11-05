@@ -2,702 +2,1529 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chỉnh sửa ảnh online miễn phí: cắt, đổi cỡ, xóa nền | Kropix</title>
-<meta name="description" content="Công cụ chỉnh sửa ảnh online miễn phí: cắt ảnh, đổi kích thước, lật xoay, xóa nền, chỉnh màu, vẽ và thêm chữ. Mở ảnh một lần, dùng cho mọi công cụ.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kropix — Chỉnh sửa ảnh online miễn phí</title>
+<meta name="description" content="Cắt, đổi cỡ, xoay, xóa nền, chỉnh màu, vẽ và thêm chữ — một khung ảnh duy nhất.">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <style>
 :root{
   --bg:#16171a; --panel:#1e2024; --panel-2:#26282f; --line:#2c2e33;
   --text:#e7e6e2; --dim:#8b8d92; --accent:#e8a33d; --ink:#201603;
   --erase:#ef6a5a; --restore:#4fa3f7;
+  --topbar-h:52px; --toolbar-h:68px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg);color:var(--text);font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100vh}
-.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
-nav{background:var(--panel);border-right:1px solid var(--line);padding:22px 12px;position:sticky;top:0;height:100vh;overflow-y:auto}
-nav .brand{font-size:24px;font-weight:700;padding:0 10px 16px}
-nav .tag{font-size:11.5px;color:var(--dim);padding:0 10px 16px;line-height:1.4}
-nav button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:1px solid transparent;color:var(--text);font:inherit;font-size:13.5px;padding:9px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px}
-nav button:hover{background:var(--panel-2)}
-nav button.active{background:rgba(232,163,61,.12);border-color:var(--accent)}
-nav .ic{width:22px;text-align:center;font-size:16px}
-main{padding:0 28px 80px;min-width:0}
-.bar{position:sticky;top:0;z-index:50;background:var(--bg);padding:14px 0;margin-bottom:8px;border-bottom:1px solid var(--line)}
-.bar .in{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.bar canvas{width:44px;height:44px;border-radius:6px;border:1px solid var(--line);flex:none}
-.bar .info{flex:1;min-width:140px}
-.bar .nm{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px}
-.bar .dm{font-size:12px;color:var(--dim)}
-.tool{display:none;max-width:1080px;margin:22px auto 0}
-.tool.active{display:block}
-.pagehead{max-width:1080px;margin:24px auto 8px}
-.pagehead h1{font-size:26px;font-weight:700;letter-spacing:-.01em;margin-bottom:6px}
-.tool>header{margin-bottom:22px}
-.tool h2{font-size:21px;font-weight:600;letter-spacing:-.01em;margin-bottom:5px}
-.tool .sub,.sub{color:var(--dim);font-size:13.5px;line-height:1.5}
-@media(max-width:820px){
-  .app{grid-template-columns:1fr}
-  nav{position:static;height:auto;display:flex;overflow-x:auto;gap:6px;padding:12px;border-right:none;border-bottom:1px solid var(--line)}
-  nav .brand,nav .tag{display:none}
-  nav button{width:auto;white-space:nowrap;margin:0;flex:none}
-  main{padding:0 14px 60px}
-  .bar{top:0}
+html,body{height:100%}
+body{
+  background:#0d0e10; color:var(--text);
+  font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  height:100dvh; overflow:hidden;
+  display:flex; justify-content:center;
 }
-.layout{display:grid;grid-template-columns:1.6fr 1fr;gap:22px;align-items:start}
-@media(max-width:900px){.layout{grid-template-columns:1fr}}
-.stage,.card{background:var(--panel);border:1px solid var(--line);border-radius:10px}
-.stage{min-height:400px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:12px}
-.card{padding:18px}
-.card h3{font-size:13px;font-weight:600;color:var(--dim);margin-bottom:14px}
-.drop{text-align:center;color:var(--dim);padding:40px 20px;cursor:pointer;border:1px dashed var(--line);border-radius:10px;width:100%;transition:.15s}
+.app{
+  width:100%; max-width:1200px; height:100dvh;
+  display:flex; flex-direction:column;
+  background:var(--bg); overflow:hidden;
+  border-left:1px solid var(--line); border-right:1px solid var(--line);
+}
+button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+input,select,textarea{font:inherit}
+.hidden{display:none!important}
+
+.topbar{
+  flex:0 0 auto; height:var(--topbar-h);
+  display:flex; align-items:center; gap:8px;
+  padding:0 12px; background:var(--panel);
+  border-bottom:1px solid var(--line); z-index:20;
+}
+.topbar .brand{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.topbar .meta{flex:1;min-width:0;font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .actions{display:flex;gap:6px}
+.tb-btn{height:36px;padding:0 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel-2);color:var(--text);font-size:13px;display:flex;align-items:center;gap:6px}
+.tb-btn:disabled{opacity:.35;cursor:not-allowed}
+.tb-btn.primary{background:var(--accent);border-color:var(--accent);color:var(--ink);font-weight:600}
+@media(max-width:420px){.tb-btn .lbl{display:none}.tb-btn{padding:0 10px}}
+@media(max-width:360px){.topbar .brand{display:none}}
+
+.viewport{
+  flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center;
+  padding:12px; position:relative; overflow:hidden; background-color:#1a1c21;
+  background-image:linear-gradient(45deg,#202226 25%,transparent 25%),linear-gradient(-45deg,#202226 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#202226 75%),linear-gradient(-45deg,transparent 75%,#202226 75%);
+  background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0;
+}
+.canvas-wrap{position:relative;display:inline-block;max-width:100%;max-height:100%;line-height:0}
+.canvas-wrap > canvas,.canvas-wrap > img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;border-radius:4px}
+.canvas-wrap > .layer{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border-radius:0}
+#view{touch-action:none;cursor:default}
+
+.drop{position:absolute;inset:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--dim);cursor:pointer;transition:.15s}
 .drop:hover{border-color:var(--accent);color:var(--text)}
-.drop .big{font-size:15px;color:var(--text);margin-bottom:6px}
+.drop .big{font-size:15px;color:var(--text)}
 .drop .small{font-size:13px}
-input[type=file]{display:none}
-.btn{font:inherit;font-size:13.5px;padding:10px 14px;border-radius:7px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer;transition:.15s}
-.btn:hover{border-color:var(--dim)}
+
+.sheet{flex:0 0 auto;display:flex;flex-direction:column;max-height:0;overflow:hidden;background:var(--panel);border-top:1px solid var(--line);transition:max-height .25s ease;z-index:15}
+.sheet.open{max-height:min(32dvh,300px)}
+.sheet-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.sheet-head h2{font-size:15px;font-weight:600}
+.sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+
+.toolbar{flex:0 0 auto;height:var(--toolbar-h);display:flex;background:var(--panel);border-top:1px solid var(--line);padding:0 4px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;z-index:18}
+.toolbar::-webkit-scrollbar{display:none}
+.tool-btn{flex:1 0 64px;min-width:64px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--dim);padding:6px 4px;border-radius:8px;font-size:11px;line-height:1.1;transition:color .15s,background .15s}
+.tool-btn .ic{font-size:20px;line-height:1}
+.tool-btn.active{color:var(--accent);background:rgba(232,163,61,.12)}
+.tool-btn:disabled{opacity:.4;cursor:not-allowed}
+@media(min-width:640px){.tool-btn{min-width:0;flex:1}.tool-btn .ic{font-size:22px}}
+
+/* Màn hình rộng: dành một cột riêng cho công cụ, không đè lên vùng ảnh. */
+@media(min-width:760px){
+  .app{display:grid;grid-template-columns:minmax(0,1fr) 0;grid-template-rows:var(--topbar-h) minmax(0,1fr) var(--toolbar-h);transition:grid-template-columns .22s ease}
+  .app.tools-open{grid-template-columns:minmax(0,1fr) 320px}
+  .topbar{grid-row:1;grid-column:1/-1}
+  .viewport{grid-row:2;grid-column:1}
+  .sheet{grid-row:2;grid-column:2;min-width:0;max-height:none;border-top:0;border-left:1px solid var(--line);transition:none}
+  .sheet.open{max-height:none}
+  .toolbar{grid-row:3;grid-column:1/-1}
+}
+
+.field{margin-bottom:14px}.field:last-child{margin-bottom:0}
+.lbl{display:block;font-size:12.5px;color:var(--dim);margin-bottom:6px}
+.lblrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12.5px;color:var(--dim)}
+.val{color:var(--accent);font-variant-numeric:tabular-nums;font-weight:600}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;background:var(--line);border-radius:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);margin-top:-8px;border:2px solid var(--bg)}
+input[type=range]::-moz-range-track{height:4px;background:var(--line);border-radius:2px}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
+input[type=number],input[type=text],select,textarea{width:100%;min-height:38px;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:16px}
+textarea{resize:vertical;min-height:56px;font-size:14px}
+input[type=color]{width:48px;height:38px;padding:3px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.btn{font-size:13.5px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px}
 .btn:disabled{opacity:.35;cursor:not-allowed}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--ink);font-weight:600}
-.btn.primary:hover{opacity:.92}
 .btn.ghost{color:var(--dim)}
-.btn.sm{padding:8px 12px;font-size:13px}
+.btn.on{background:var(--accent);border-color:var(--accent);color:var(--ink);font-weight:600}
+.btn.reset-control{color:var(--dim);background:rgba(255,255,255,.025);border-color:var(--line);transition:background .15s,border-color .15s,color .15s,opacity .15s}
+.btn.reset-control:not(:disabled):not(.reset-ready){color:var(--text)}
+.btn.reset-ready{background:var(--accent);border-color:var(--accent);color:var(--ink);font-weight:600}
 .btn.full{width:100%}
-.btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-.btns .btn{flex:1;min-width:110px}
-.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:16px;font-size:13.5px}
-.row label,.lbl{color:var(--dim);font-size:13px}
-.lbl{display:block;margin-bottom:6px}
-.val{color:var(--accent);font-variant-numeric:tabular-nums}
-.field{margin-bottom:14px}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:var(--line);outline:none;accent-color:var(--accent)}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #16171a}
-input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;border:2px solid #16171a}
-input[type=number],input[type=text],textarea,select{width:100%;background:var(--panel-2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font:inherit;font-size:13.5px}
-textarea{resize:vertical}
-input[type=color]{width:100%;height:34px;border:1px solid var(--line);border-radius:6px;padding:2px;background:transparent;cursor:pointer}
-.two{display:flex;gap:10px}.two>*{flex:1}
-.hint{font-size:12px;color:var(--dim);line-height:1.5;margin-top:12px}
-.stats{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:2px 14px;margin-top:12px}
-.stat{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
-.stat:last-child{border-bottom:none}.stat span:first-child{color:var(--dim)}.stat span:last-child{font-weight:600}
-.checker{background-color:#1a1c21;background-image:linear-gradient(45deg,#2a2c32 25%,transparent 25%),linear-gradient(-45deg,#2a2c32 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#2a2c32 75%),linear-gradient(-45deg,transparent 75%,#2a2c32 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}
-canvas{max-width:100%;display:block;border-radius:6px}
-.hidden{display:none!important}
-.link{display:inline-block;padding:10px 18px;background:var(--accent);color:var(--ink);text-decoration:none;border-radius:7px;font-weight:600;font-size:13.5px}
-#overlay{position:fixed;inset:0;background:rgba(22,23,27,.88);border:3px dashed var(--accent);display:none;align-items:center;justify-content:center;z-index:200;pointer-events:none;font-size:22px;font-weight:600;color:var(--accent)}
-#overlay.show{display:flex}
+.reset1{background:none;border:none;padding:0;color:var(--dim);font-size:12px;cursor:pointer;text-decoration:underline;margin-left:8px;min-height:0}
+.reset1:disabled{opacity:.35;cursor:default;text-decoration:none}
+.lblrow .reset1{flex:none}
+.btn.sm{padding:8px 12px;font-size:12.5px;min-height:34px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}.btns .btn{flex:1;min-width:0}
+.two{display:flex;gap:10px}.two > *{flex:1;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hint{font-size:12px;color:var(--dim);line-height:1.5;margin-top:10px}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:12px;cursor:pointer}
+.check input{width:auto;min-height:auto}
 
-/* download format controls */
-#dl-format{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:7px 8px;color:var(--text);font:inherit;font-size:12.5px;cursor:pointer;flex:none;width:auto}
-#dl-quality{width:70px;flex:none}
-#dl-quality-v{font-size:12px;text-align:center;white-space:nowrap;min-width:44px}
-@media(max-width:820px){#dl-quality{width:60px}}
+.brush-cursor{position:absolute;z-index:12;width:0;height:0;border:2px solid var(--accent);border-radius:50%;pointer-events:none;display:none;transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(0,0,0,.55),0 0 12px rgba(232,163,61,.35);background:rgba(232,163,61,.08);will-change:left,top,width,height}
+#brush-cursor{border-color:var(--erase);background:rgba(239,106,90,.12)}
+#brush-cursor.restore{border-color:var(--restore);background:rgba(79,163,247,.12)}
+#draw-ring{border-color:var(--accent);background:rgba(232,163,61,.10)}
+#draw-ring.eraser{border-color:var(--text);background:rgba(255,255,255,.15)}
 
-/* crop */
+.dt{position:absolute;pointer-events:auto;cursor:move;white-space:pre;user-select:none;padding:2px 4px;border:1px dashed transparent;font-weight:bold;touch-action:none}
+.dt.sel{border-color:var(--accent)}
+#text-layer{display:none;pointer-events:none}
+#text-layer.on{display:block;pointer-events:auto}
+
+.export-modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px}
+.export-dialog{width:min(100%,420px);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.export-dialog h2{font-size:18px;margin-bottom:16px}
+.export-size{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line);font-size:13px}
+.export-size span{color:var(--dim)}
+.export-size strong{font-size:15px;color:var(--accent)}
+
+#dropzone-hint{position:fixed;inset:0;z-index:200;pointer-events:none;background:rgba(22,23,27,.85);border:3px dashed var(--accent);display:none;align-items:center;justify-content:center;font-size:20px;font-weight:600;color:var(--accent)}
+#dropzone-hint.show{display:flex}
+
 .cropper-view-box,.cropper-face{background:rgba(232,163,61,.08)}
 .cropper-line,.cropper-point{background-color:var(--accent)}
-#crop-img{max-width:100%;max-height:560px;display:block;margin:0 auto}
-
-/* resize */
-.presets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
-
-/* flip */
-.fstage{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:6px}
-.fstage canvas{max-width:100%;max-height:100%;transition:transform .25s}
-.grid4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.grid4 .span2{grid-column:span 2}
-
-/* brush */
-.bstage{position:relative}
-#brush-dot{position:fixed;pointer-events:none;border:1.5px solid var(--erase);border-radius:50%;background:rgba(239,106,90,.14);z-index:10;display:none}
-#brush-preview{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid var(--erase);background:rgba(239,106,90,.14);pointer-events:none;opacity:0;z-index:20;transition:opacity .25s}
+#crop-img{max-width:100%;max-height:100%}
+.canvas-wrap.cropping{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;max-width:none;max-height:none;line-height:0}
+#crop-holder{position:relative;margin:0 auto;line-height:0}
+#crop-holder.hidden{display:none!important}
+#crop-holder > img{display:block;max-width:100%;max-height:100%;margin:0 auto}
+#brush-preview{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid var(--erase);background:rgba(239,106,90,.14);pointer-events:none;opacity:0;z-index:30;transition:opacity .2s,width .05s,height .05s}
 #brush-preview.show{opacity:1}
-#brush-preview .t{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);font-size:12px;background:rgba(0,0,0,.6);padding:2px 8px;border-radius:6px;white-space:nowrap}
-#brush-canvas{cursor:none;touch-action:none}
-.mode.erase.on{border-color:var(--erase);color:var(--erase);background:#4a2b28}
-.mode.restore.on{border-color:var(--restore);color:var(--restore);background:#223a52}
-
-/* adjust */
-.reset1{background:none;border:none;color:var(--dim);font-size:12px;cursor:pointer;text-decoration:underline;margin-left:8px}
-.reset1:disabled{opacity:.35;cursor:default;text-decoration:none}
-.lblrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px;color:var(--dim)}
-
-/* draw */
-.cstack{position:relative;line-height:0}
-#draw-draw{position:absolute;top:0;left:0;touch-action:none;cursor:none}
-#draw-ring{position:absolute;top:0;left:0;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none}
-#draw-ring.pen{border:1.5px solid var(--accent);background:rgba(232,163,61,.12)}
-#draw-ring.eraser{border:1.5px solid var(--text);background:rgba(255,255,255,.15)}
-.tools{display:flex;gap:8px;margin-bottom:18px}
-.tools .btn{flex:1}
-.tools .btn.on{background:var(--accent);border-color:var(--accent);color:var(--ink)}
-
-/* text */
-#txt-wrap{position:relative;display:none;max-width:100%;touch-action:none;border-radius:6px;overflow:hidden}
-#txt-layer{position:absolute;inset:0;pointer-events:none}
-.dt{position:absolute;pointer-events:auto;cursor:move;white-space:nowrap;user-select:none;padding:2px 4px;border:1px dashed transparent}
-.dt.sel{border-color:var(--accent)}
-
+#brush-preview.restore{border-color:var(--restore);background:rgba(79,163,247,.14)}
+#brush-preview .t{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);font-size:12px;background:rgba(0,0,0,.65);padding:2px 8px;border-radius:6px;white-space:nowrap;color:#fff}
 </style>
 </head>
 <body>
-<input type="file" id="gfile" accept="image/*">
-<div id="overlay">Thả ảnh vào đây để mở</div>
-<div class="app">
-<nav id="nav">
-  <div class="brand">Kropix</div>
-</nav>
-<main>
+<input type="file" id="gfile" accept="image/*" style="display:none">
+<div id="dropzone-hint">Thả ảnh vào đây để mở</div>
 
-<div class="pagehead">
-  <h1>Công cụ chỉnh sửa ảnh online miễn phí</h1>
-  <p class="sub">Cắt ảnh, đổi kích thước, lật xoay, xóa nền, chỉnh màu, vẽ và thêm chữ ngay trên trình duyệt.</p>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">Kropix</div>
+    <div class="meta" id="topbar-meta">Chưa có ảnh</div>
+    <div class="actions">
+      <button class="tb-btn primary" id="btn-open"><span>📁</span><span class="lbl">Mở ảnh</span></button>
+      <button class="tb-btn" id="btn-undo" disabled><span>↶</span><span class="lbl">Hoàn tác</span></button>
+      <button class="tb-btn" id="btn-dl" disabled><span>⬇</span><span class="lbl">Tải ảnh</span></button>
+    </div>
+  </header>
+
+  <div class="viewport" id="viewport">
+    <div class="canvas-wrap hidden" id="canvas-wrap">
+      <canvas id="view"></canvas>
+      <div id="crop-holder" class="hidden"><img id="crop-img" alt=""></div>
+      <div id="text-layer" class="layer"></div>
+      <div id="brush-cursor" class="brush-cursor"></div>
+      <div id="draw-ring" class="brush-cursor"></div>
+    </div>
+    <div id="brush-preview"><span class="t" id="brush-preview-label">35px</span></div>
+    <div class="drop" id="drop">
+      <div class="big">📸 Kéo thả ảnh vào đây</div>
+      <div class="small">hoặc bấm để chọn file</div>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet">
+    <div class="sheet-head">
+      <h2 id="sheet-title">Công cụ</h2>
+      <button class="btn primary sm" id="sheet-done">✓ Xong</button>
+    </div>
+    <div class="sheet-body" id="sheet-body"></div>
+  </div>
+
+  <nav class="toolbar" id="toolbar">
+    <button class="tool-btn" data-tool="crop"><span class="ic">✂️</span><span>Cắt</span></button>
+    <button class="tool-btn" data-tool="resize"><span class="ic">📐</span><span>Kích thước</span></button>
+    <button class="tool-btn" data-tool="flip"><span class="ic">⇋</span><span>Xoay</span></button>
+    <button class="tool-btn" data-tool="brush"><span class="ic">🖌️</span><span>Xóa nền</span></button>
+    <button class="tool-btn" data-tool="adjust"><span class="ic">🌗</span><span>Màu</span></button>
+    <button class="tool-btn" data-tool="draw"><span class="ic">🖊️</span><span>Vẽ</span></button>
+    <button class="tool-btn" data-tool="text"><span class="ic">🔤</span><span>Chữ</span></button>
+  </nav>
 </div>
 
-<div class="bar"><div class="in">
-  <canvas id="bar-thumb" class="checker" width="44" height="44"></canvas>
-  <div class="info"><div class="nm" id="bar-name">Chưa có ảnh</div><div class="dm" id="bar-dim">Mở một ảnh để bắt đầu chỉnh sửa</div></div>
-  <button class="btn primary sm" id="bar-open">📁 Mở ảnh</button>
-  <button class="btn sm" id="bar-undo" disabled>↶ Hoàn tác</button>
-  <select id="dl-format" title="Định dạng tải về">
-    <option value="webp">WebP</option>
-    <option value="png">PNG</option>
-  </select>
-  <input type="range" id="dl-quality" min="70" max="95" value="85" title="Chất lượng WebP (kéo trái = nhỏ hơn, kéo phải = nét hơn)">
-  <span class="val" id="dl-quality-v"></span>
-  <button class="btn sm" id="bar-dl" disabled>⬇ Tải ảnh</button>
-</div></div>
-
-<!-- 1. CẮT ẢNH -->
-<section class="tool" id="tool-crop" data-title="Cắt ảnh" data-icon="✂️">
-  <header><h2>✂️ Cắt ảnh</h2><p class="sub">Kéo khung để chọn vùng cần giữ, rồi bấm Cắt ảnh. Ảnh sau khi cắt trở thành ảnh hiện tại.</p></header>
-  <div class="layout">
-    <div class="stage" data-r="stage">
-      <div class="drop" data-r="drop"><div class="big">📸 Kéo thả ảnh vào đây</div><div class="small">hoặc bấm để chọn file</div></div>
-      <div class="hidden" style="width:100%" data-r="wrap"><img id="crop-img" data-r="img" alt=""></div>
+<div class="export-modal hidden" id="export-modal">
+  <div class="export-dialog">
+    <h2>Tải ảnh</h2>
+    <div class="field">
+      <label class="lbl">Định dạng</label>
+      <select id="export-format">
+        <option value="webp">WebP — nhỏ gọn</option>
+        <option value="png">PNG — chất lượng cao</option>
+      </select>
     </div>
-    <div class="card">
-      <h3>Thao tác</h3>
-      <button class="btn primary full" data-r="crop" disabled>✂️ Cắt ảnh</button>
-      <div class="btns"><button class="btn ghost" data-r="reset" disabled>🔄 Đặt lại khung</button></div>
-      <div class="stats hidden" data-r="stats">
-        <div class="stat"><span>Kích thước ảnh</span><span data-r="orig">-</span></div>
-        <div class="stat"><span>Trạng thái</span><span data-r="status">-</span></div>
-      </div>
+    <div class="field" id="export-q-wrap">
+      <div class="lblrow"><span>Chất lượng</span><span class="val" id="export-q-v">85%</span></div>
+      <input type="range" id="export-q" min="70" max="95" value="85">
+    </div>
+    <div class="export-size"><span>Dung lượng ước tính</span><strong id="export-size">—</strong></div>
+    <div class="btns" style="margin-top:14px">
+      <button class="btn" id="export-cancel">Hủy</button>
+      <button class="btn primary" id="export-go">⬇ Tải xuống</button>
     </div>
   </div>
-</section>
-
-<!-- 3. ĐỔI KÍCH THƯỚC -->
-<section class="tool" id="tool-resize" data-title="Đổi kích thước" data-icon="📐">
-  <header><h2>📐 Đổi kích thước (pixel) ảnh</h2><p class="sub">Nhập chiều rộng và cao mới (hai ô độc lập). Khi chuyển sang công cụ khác, kích thước mới được áp dụng cho ảnh hiện tại.</p></header>
-  <div class="layout">
-    <div>
-      <div class="stage checker" data-r="stage">
-        <div class="drop" data-r="drop" style="background:var(--panel)"><div class="big">Kéo thả ảnh vào đây</div><div class="small">hoặc bấm để chọn ảnh từ máy</div></div>
-        <canvas class="hidden" data-r="canvas"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Kích thước</h3>
-      <div class="stats" data-r="orig" style="margin:0 0 14px"><div class="stat" style="border:none"><span>Chưa có ảnh nào.</span></div></div>
-      <div class="two field"><div><label class="lbl">Rộng (px)</label><input type="number" min="1" max="10000" data-r="w" disabled></div><div><label class="lbl">Cao (px)</label><input type="number" min="1" max="10000" data-r="h" disabled></div></div>
-      <button class="btn full" data-r="reset" disabled>↺ Đặt lại kích thước gốc</button>
-      <label style="display:flex;gap:8px;align-items:center;font-size:13px;margin:14px 0"><input type="checkbox" data-r="noEnlarge"> Không phóng to quá kích thước gốc</label>
-      <label class="lbl">Kích thước có sẵn</label>
-      <div class="presets" data-r="presets">
-        <button class="btn" data-w="1920" data-h="1080">1920×1080</button><button class="btn" data-w="1280" data-h="720">1280×720</button>
-        <button class="btn" data-w="1080" data-h="1080">1080×1080</button><button class="btn" data-w="800" data-h="600">800×600</button>
-        <button class="btn" data-w="512" data-h="512">512×512</button><button class="btn" data-w="100" data-h="100">100×100</button>
-      </div>
-      <div class="stats hidden" data-r="newInfo"></div>
-    </div>
-  </div>
-</section>
-
-<!-- 5. LẬT & XOAY -->
-<section class="tool" id="tool-flip" data-title="Lật & xoay" data-icon="⇋">
-  <header><h2>⇋ Lật &amp; xoay ảnh</h2><p class="sub">Lật trái–phải, trên–dưới hoặc xoay 90°. Khi chuyển công cụ, thay đổi được áp dụng vào ảnh hiện tại.</p></header>
-  <div class="layout">
-    <div class="stage" data-r="stage"><div class="fstage checker"><div class="drop" data-r="drop" style="border:none;background:transparent"><div class="big">Chưa có ảnh</div><div class="small">Kéo thả ảnh vào đây hoặc bấm để chọn</div></div><canvas class="hidden" data-r="img"></canvas></div></div>
-    <div class="card">
-      <h3>Thao tác</h3>
-      <div class="grid4">
-        <button class="btn" data-r="fh">⇋ Lật trái–phải</button><button class="btn" data-r="fv">⇅ Lật trên–dưới</button>
-        <button class="btn" data-r="rl">↺ Xoay 90° trái</button><button class="btn" data-r="rr">↻ Xoay 90° phải</button>
-        <button class="btn span2" data-r="r180">⟲ Xoay 180°</button>
-        <button class="btn ghost span2" data-r="reset">Đặt lại</button>
-      </div>
-      <div class="stats"><div class="stat"><span>Lật ngang</span><span data-r="sh">Tắt</span></div><div class="stat"><span>Lật dọc</span><span data-r="sv">Tắt</span></div><div class="stat"><span>Góc xoay</span><span data-r="sr">0°</span></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- 6. MAGIC BRUSH -->
-<section class="tool" id="tool-brush" data-title="Magic Brush" data-icon="🖌️">
-  <header><h2>🖌️ Magic Brush — xóa nền bằng nét cọ</h2><p class="sub">Tô lên vùng muốn xoá, vùng đó sẽ trong suốt (transparent). Làm tay hoàn toàn, không dùng AI.</p></header>
-  <div class="card" style="margin-bottom:14px;display:flex;flex-wrap:wrap;gap:14px;align-items:center">
-    <div style="display:flex;gap:8px"><button class="btn mode erase on" data-r="mErase">🖌 Xoá</button><button class="btn mode restore" data-r="mRestore">↩ Khôi phục</button></div>
-    <div style="display:flex;align-items:center;gap:8px"><label class="lbl" style="margin:0">Cỡ cọ</label><input type="range" min="5" max="150" value="35" style="width:120px" data-r="size"><span class="val" data-r="sizeL" style="min-width:40px">35px</span></div>
-    <div style="display:flex;gap:8px"><button class="btn" data-r="undo" disabled>Hoàn tác nét</button><button class="btn" data-r="reset" disabled>Reset</button></div>
-  </div>
-  <div class="stage checker bstage" data-r="stage">
-    <div class="drop" data-r="drop" style="background:var(--panel);max-width:420px"><div class="big">Kéo thả ảnh vào đây</div><div class="small">hoặc bấm để chọn ảnh</div></div>
-    <canvas id="brush-canvas" class="hidden" data-r="canvas"></canvas>
-    <div id="brush-preview"><span class="t" data-r="ptag">35px</span></div>
-  </div>
-  <p class="hint" style="text-align:center">Giữ chuột (hoặc chạm) và kéo để tô. "Xoá" (đỏ) để xoá nền, "Khôi phục" (xanh) để vẽ lại phần đã xoá. Ảnh lớn hơn 2400px sẽ được thu nhỏ khi chỉnh ở công cụ này.</p>
-  <div id="brush-dot"></div>
-</section>
-
-<!-- 7. SÁNG / TƯƠNG PHẢN / BÃO HÒA -->
-<section class="tool" id="tool-adjust" data-title="Sáng · Tương phản" data-icon="🌗">
-  <header><h2>🌗 Độ sáng, tương phản, bão hòa</h2><p class="sub">Chỉnh nhanh ba thông số. Khi chuyển công cụ, kết quả được áp dụng vào ảnh hiện tại.</p></header>
-  <div class="layout">
-    <div class="stage" data-r="stage">
-      <div class="drop" data-r="drop"><div class="big">Kéo thả ảnh vào đây</div><div class="small">hoặc bấm để chọn tệp từ máy</div></div>
-      <canvas class="hidden" data-r="canvas" style="max-height:560px"></canvas>
-    </div>
-    <div class="card">
-      <h3>Điều chỉnh</h3>
-      <div class="field"><div class="lblrow"><span>Độ sáng</span><span><span class="val" data-r="bv">0</span><button class="reset1" data-t="brightness" disabled>Đặt lại</button></span></div><input type="range" min="-100" max="100" value="0" data-r="brightness"></div>
-      <div class="field"><div class="lblrow"><span>Độ tương phản</span><span><span class="val" data-r="cv">0</span><button class="reset1" data-t="contrast" disabled>Đặt lại</button></span></div><input type="range" min="-100" max="100" value="0" data-r="contrast"></div>
-      <div class="field"><div class="lblrow"><span>Độ bão hòa</span><span><span class="val" data-r="sv">0</span><button class="reset1" data-t="saturation" disabled>Đặt lại</button></span></div><input type="range" min="-100" max="100" value="0" data-r="saturation"></div>
-    </div>
-  </div>
-</section>
-
-<!-- 8. VẼ LÊN ẢNH -->
-<section class="tool" id="tool-draw" data-title="Vẽ lên ảnh" data-icon="🖊️">
-  <header><h2>🖊️ Đánh dấu (vẽ) lên ảnh</h2><p class="sub">Chọn bút hoặc tẩy để vẽ trực tiếp lên ảnh. Nét vẽ được áp dụng vào ảnh hiện tại khi chuyển công cụ.</p></header>
-  <div class="layout">
-    <div class="stage" data-r="stage">
-      <div class="drop" data-r="drop"><div class="big">Kéo thả ảnh vào đây</div><div class="small">hoặc bấm để chọn tệp từ máy</div></div>
-      <div class="hidden" data-r="wrap"><div class="cstack"><canvas id="draw-img" data-r="img" style="max-height:560px"></canvas><canvas id="draw-draw" data-r="draw" style="max-height:560px"></canvas><div id="draw-ring" class="pen" data-r="ring"></div></div></div>
-    </div>
-    <div class="card">
-      <h3>Công cụ</h3>
-      <div class="tools"><button class="btn on" data-t="pen">✏️ Bút vẽ</button><button class="btn" data-t="eraser">🧽 Tẩy</button></div>
-      <div class="row"><span>Màu bút</span><input type="color" value="#e8a33d" data-r="color" style="width:46px"></div>
-      <div class="row"><span>Kích thước</span><input type="range" min="1" max="60" value="8" data-r="size" style="flex:1"><span class="val" data-r="sizeV" style="width:26px;text-align:right">8</span></div>
-      <div class="btns"><button class="btn" data-r="undo" disabled>Hoàn tác nét</button><button class="btn" data-r="redo" disabled>Làm lại</button></div>
-      <div class="btns"><button class="btn" data-r="clear" disabled>Xóa nét vẽ</button></div>
-      <div class="hint">Tẩy chỉ xóa nét bút đã vẽ, không làm hỏng ảnh gốc bên dưới. Ảnh lớn hơn 2400px sẽ được thu nhỏ khi vẽ.</div>
-    </div>
-  </div>
-</section>
-
-<!-- 9. THÊM CHỮ -->
-<section class="tool" id="tool-text" data-title="Thêm chữ" data-icon="🔤">
-  <header><h2>🔤 Thêm chữ lên ảnh</h2><p class="sub">Thêm chữ, kéo để di chuyển, chỉnh kiểu chữ. Chữ được áp dụng vào ảnh hiện tại khi chuyển công cụ.</p></header>
-  <div class="layout">
-    <div>
-      <div class="stage" data-r="stage" style="min-height:360px">
-        <div class="drop" data-r="drop"><div class="big">Kéo thả ảnh vào đây</div><div class="small">hoặc bấm để chọn ảnh từ máy</div></div>
-        <div id="txt-wrap" data-r="wrap"><canvas data-r="canvas" style="border-radius:0"></canvas><div id="txt-layer" data-r="layer"></div></div>
-      </div>
-      <div class="btns"><button class="btn primary" data-r="add" disabled>➕ Thêm chữ</button><button class="btn" data-r="del" disabled>🗑️ Xóa chữ chọn</button></div>
-    </div>
-    <div class="card hidden" data-r="panel">
-      <h3>Tùy chỉnh chữ</h3>
-      <div class="field"><label class="lbl">Nội dung</label><textarea rows="3" data-r="content" placeholder="Nhập chữ..."></textarea></div>
-      <div class="field"><label class="lbl">Font chữ (kiểu chữ)</label><select data-r="family">
-        <option value="Arial, sans-serif">Arial</option><option value="'Times New Roman', serif">Times New Roman</option><option value="'Courier New', monospace">Courier New</option><option value="Georgia, serif">Georgia</option><option value="Verdana, sans-serif">Verdana</option><option value="'Comic Sans MS', cursive">Comic Sans MS</option><option value="Impact, sans-serif">Impact</option><option value="'Brush Script MT', cursive">Brush Script MT</option></select></div>
-      <div class="field"><div class="lblrow"><span>Cỡ chữ</span><span><span class="val" data-r="fsV">40px</span><button class="reset1" data-r="fsR">Đặt lại</button></span></div><input type="range" min="10" max="200" value="40" data-r="fs"></div>
-      <div class="field"><div class="lblrow"><span>Xoay</span><span><span class="val" data-r="rotV">0°</span><button class="reset1" data-r="rotR">Đặt lại</button></span></div><input type="range" min="-180" max="180" value="0" data-r="rot"></div>
-      <div class="two field"><div><label class="lbl">Màu chữ</label><input type="color" value="#ffffff" data-r="color"></div><div><label class="lbl">Độ đậm</label><select data-r="weight"><option value="normal">Thường</option><option value="bold" selected>Đậm</option></select></div></div>
-      <label style="display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:12px"><input type="checkbox" data-r="stroke"> Viền chữ</label>
-      <div class="hidden" data-r="strokeOpt">
-        <div class="two field"><div><label class="lbl">Màu viền</label><input type="color" value="#000000" data-r="strokeColor"></div>
-        <div><div class="lblrow"><span>Độ dày</span><span><span class="val" data-r="swV">2px</span><button class="reset1" data-r="swR">Đặt lại</button></span></div><input type="range" min="1" max="10" value="2" data-r="sw"></div></div>
-      </div>
-      <div class="field"><div class="lblrow"><span>Độ mờ</span><span class="val" data-r="opV">100%</span></div><input type="range" min="0" max="100" value="100" data-r="op"></div>
-      <div class="hint">💡 Kéo chữ trực tiếp trên ảnh để di chuyển. Bấm vào chữ để chọn và chỉnh sửa.</div>
-    </div>
-  </div>
-</section>
-
-</main>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
-/* ===== Tiện ích ===== */
-const $ = id => document.getElementById(id);
-function refs(root){ const o={}; root.querySelectorAll('[data-r]').forEach(e=>o[e.dataset.r]=e); return o; }
-function fmtBytes(b){ return b<1024 ? b+' B' : b<1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(2)+' MB'; }
-function isImg(f){ return f && f.type && f.type.startsWith('image/'); }
-function readDataURL(file, cb){ const r=new FileReader(); r.onload=e=>cb(e.target.result); r.readAsDataURL(file); }
-function loadImg(src, cb){ const i=new Image(); i.onload=()=>cb(i); i.src=src; }
-function downloadURL(url, name){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
-function newCanvas(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; }
-function copyCanvas(src){ const c=newCanvas(src.width,src.height); c.getContext('2d').drawImage(src,0,0); return c; }
-function scaledCopy(src,max){ const s=Math.min(1,max/Math.max(src.width,src.height)); const c=newCanvas(Math.round(src.width*s),Math.round(src.height*s)); c.getContext('2d').drawImage(src,0,0,c.width,c.height); return c; }
+/* ======================================================================
+   TIỆN ÍCH
+   ====================================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const newCanvas = (w, h) => { const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; };
+const copyCanvas = src => { const c = newCanvas(src.width, src.height); c.getContext('2d').drawImage(src, 0, 0); return c; };
+const scaledCopy = (src, max) => {
+  const s = Math.min(1, max / Math.max(src.width, src.height));
+  const c = newCanvas(src.width * s, src.height * s);
+  const x = c.getContext('2d');
+  x.imageSmoothingQuality = 'high';
+  x.drawImage(src, 0, 0, c.width, c.height);
+  return c;
+};
+const fmtBytes = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB';
+const isImg = f => !!(f && f.type && f.type.startsWith('image/'));
+const readDataURL = (f, cb) => { const r = new FileReader(); r.onload = e => cb(e.target.result); r.readAsDataURL(f); };
+const loadImg = (src, cb) => { const i = new Image(); i.onload = () => cb(i); i.src = src; };
+const downloadURL = (url, name) => { const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); };
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const VIEW_MAX = 2400;   /* giới hạn cạnh dài của canvas hiển thị (giống bản gốc) */
 
-var updateDlEstimate = function(){};
-const App={
-  canvas:null, file:null, name:'anh', ver:0, hist:[], tools:{}, cur:null,
-  pick(){ const f=$('gfile'); f.value=''; f.click(); },
-  setFile(f){
-    if(!isImg(f)) return;
-    readDataURL(f,u=>loadImg(u,img=>{
-      const c=newCanvas(img.naturalWidth||img.width,img.naturalHeight||img.height); c.getContext('2d').drawImage(img,0,0);
-      this.canvas=c; this.file=f; this.name=f.name.replace(/\.[^.]+$/,'')||'anh'; this.hist=[]; this.bump(true);
-    }));
+/* ======================================================================
+   APP — trạng thái ảnh + điều phối công cụ
+   ====================================================================== */
+const App = {
+  canvas: null, file: null, name: 'anh', hist: [], ver: 0,
+  activeTool: null, activeId: null, pendingTool: null,
+
+  /* --- dữ liệu --- */
+  setImage(c, file) {
+    this._color = null;
+    this.canvas = c;
+    this.file = file || null;
+    this.name = (file ? file.name.replace(/\.[^.]+$/, '') : 'anh') || 'anh';
+    this.hist = [];
+    this.ver++;
+    this.refresh();
   },
-  setCanvas(c,reload){
-    if(this.canvas){ this.hist.push(this.canvas); if(this.hist.length>8) this.hist.shift(); }
-    this.canvas=c; this.file=null; this.bump(reload);
+  setCanvas(c) {
+    this._color = null;
+    if (this.canvas) { this.hist.push(this.canvas); if (this.hist.length > 12) this.hist.shift(); }
+    this.canvas = c;
+    this.file = null;
+    this.ver++;
+    this.refresh();
   },
-  bump(reload){ this.ver++; this.updateBar(); updateDlEstimate(); if(reload&&this.cur) this.sync(this.cur); },
-  sync(t){ if(this.canvas && t.loadedVer!==this.ver){ t.load(this.canvas); t.loadedVer=this.ver; } },
-  flush(reload){ const t=this.cur; if(t&&t.dirty&&t.dirty()){ const c=t.commit(); if(c) this.setCanvas(c,reload); } },
-  undo(){
-    const t=this.cur;
-    if(t&&t.dirty&&t.dirty()){ t.load(this.canvas); t.loadedVer=this.ver; return; }
-    if(!this.hist.length) return; this.canvas=this.hist.pop(); this.file=null; this.bump(true);
+
+  /* --- hiển thị --- */
+  baseView() {
+    const view = $('#view');
+    const s = Math.min(1, VIEW_MAX / Math.max(this.canvas.width, this.canvas.height));
+    view.width = Math.round(this.canvas.width * s);
+    view.height = Math.round(this.canvas.height * s);
+    const x = view.getContext('2d');
+    x.clearRect(0, 0, view.width, view.height);
+    x.imageSmoothingQuality = 'high';
+    x.drawImage(this.canvas, 0, 0, view.width, view.height);
   },
-  updateBar(){
-    const has=!!this.canvas, th=$('bar-thumb'), x=th.getContext('2d'); x.clearRect(0,0,44,44);
-    if(has){ const k=Math.min(44/this.canvas.width,44/this.canvas.height), w=this.canvas.width*k, h=this.canvas.height*k; x.drawImage(this.canvas,(44-w)/2,(44-h)/2,w,h); }
-    $('bar-name').textContent=has?(this.file?this.file.name:this.name+' (đã chỉnh sửa)'):'Chưa có ảnh';
-    $('bar-dim').textContent=has?`${this.canvas.width} × ${this.canvas.height} px`:'Mở một ảnh để bắt đầu chỉnh sửa';
-    $('bar-undo').disabled=!this.hist.length; $('bar-dl').disabled=!has;
+  refresh() {
+    updateTopbar();
+    const drop = $('#drop'), wrap = $('#canvas-wrap');
+    if (!this.canvas) { drop.classList.remove('hidden'); wrap.classList.add('hidden'); return; }
+    drop.classList.add('hidden');
+    wrap.classList.remove('hidden');
+    if (this.activeTool && this.activeTool.render) this.activeTool.render();
+    else this.baseView();
+  },
+
+  /* --- công cụ --- */
+  openTool(id) {
+    if (!this.canvas) { this.pendingTool = id; pickFile(); return; }
+    if (this.activeId === id) { this.closeTool(); return; }
+    if (this.activeTool) this.closeTool();             /* đổi công cụ thì đóng chế độ cũ, không tự áp dụng */
+    const tool = TOOLS[id];
+    if (!tool) return;
+    $('#sheet-title').textContent = tool.title;
+    const body = $('#sheet-body');
+    body.innerHTML = tool.panel;
+    this.activeTool = tool;
+    this.activeId = id;
+    tool.init(body);
+    $$('.tool-btn').forEach(b => b.classList.toggle('active', b.dataset.tool === id));
+    $('#sheet').classList.add('open');
+    $('.app').classList.add('tools-open');
+    tool.enter();
+    this.refresh();
+  },
+  closeTool() {
+    const t = this.activeTool;
+    this.activeTool = null;
+    this.activeId = null;
+    if (t && t.leave) t.leave();
+    $$('.tool-btn').forEach(b => b.classList.remove('active'));
+    $('#sheet').classList.remove('open');
+    $('.app').classList.remove('tools-open');
+    $('#sheet-body').innerHTML = '';
+    this.refresh();
+  },
+  commitAndClose() {
+    const t = this.activeTool;
+    if (!t) { this.closeTool(); return; }
+    if (t.apply) t.apply(); else this.closeTool();
+  },
+
+  /* --- trạng thái --- */
+  isDirty() { return !!(this.activeTool && this.activeTool.dirty && this.activeTool.dirty()); },
+  undo() {
+    const t = this.activeTool;
+    if (t && t.handleUndo && t.handleUndo()) return;
+    if (this.isDirty() && t && t.discard) { t.discard(); return; }   /* bỏ thay đổi đang xem trước */
+    if (!this.hist.length) return;
+    const keepId = this.activeId;
+    if (t) { this.activeTool = null; this.activeId = null; t.leave(); }
+    this.canvas = this.hist.pop();
+    this._color = null;
+    this.file = null;
+    this.ver++;
+    updateTopbar();
+    this.refresh();
+    if (keepId && TOOLS[keepId]) { this.activeId = null; this.openTool(keepId); }
   }
 };
-$('gfile').addEventListener('change',e=>App.setFile(e.target.files[0]));
-$('bar-open').onclick=()=>App.pick();
-$('bar-undo').onclick=()=>{ App.undo(); App.updateBar(); };
 
-/* ===== Định dạng tải về: PNG / WebP ===== */
-(function(){
-  const fmt=$('dl-format'), q=$('dl-quality'), qv=$('dl-quality-v');
-  let timer=0;
-  const isWebp=()=>fmt.value==='webp';
-
-  updateDlEstimate = function(){
-    if(!App.canvas){ qv.textContent=''; return; }
-    clearTimeout(timer);
-    qv.textContent='…';
-    timer = setTimeout(()=>{
-      const f=fmt.value, quality=parseInt(q.value)/100;
-      App.canvas.toBlob(blob=>{
-        if(!blob) return;
-        qv.textContent=fmtBytes(blob.size);
-      }, 'image/'+f, f==='webp'?quality:undefined);
-    }, 300);
-  };
-
-  const savedFmt=localStorage.getItem('kropix_fmt'), savedQ=localStorage.getItem('kropix_q');
-  if(savedFmt==='png'||savedFmt==='webp') fmt.value=savedFmt;
-  if(savedQ) q.value=savedQ;
-  q.style.display = isWebp() ? '' : 'none';
-
-  fmt.onchange=()=>{
-    localStorage.setItem('kropix_fmt',fmt.value);
-    q.style.display = isWebp() ? '' : 'none';
-    updateDlEstimate();
-  };
-  q.oninput=()=>{
-    localStorage.setItem('kropix_q',q.value);
-    if(isWebp()) updateDlEstimate();
-  };
-  updateDlEstimate();
-})();
-
-/* Tải ảnh với định dạng đã chọn. WebP fallback → PNG nếu browser không hỗ trợ. */
-function exportCanvas(canvas, baseName){
-  const fmt=$('dl-format').value;
-  const quality=(parseInt($('dl-quality').value)||85)/100;
-  canvas.toBlob(blob=>{
-    if(!blob) return;
-    let ext=fmt;
-    if(fmt==='webp' && blob.type!=='image/webp') ext='png';
-    downloadURL(URL.createObjectURL(blob), baseName+'.'+ext);
-  }, 'image/'+fmt, quality);
+function updateTopbar() {
+  const meta = $('#topbar-meta');
+  if (App.canvas) {
+    const src = App.file ? App.file.name : App.name + ' (đã chỉnh sửa)';
+    meta.textContent = src + ' · ' + App.canvas.width + '×' + App.canvas.height + ' px';
+  } else meta.textContent = 'Chưa có ảnh';
+  $('#btn-undo').disabled = !App.hist.length;
+  $('#btn-dl').disabled = !App.canvas;
 }
 
-$('bar-dl').onclick=()=>{ App.flush(true); if(App.canvas) exportCanvas(App.canvas, App.name); };
-document.querySelectorAll('.drop').forEach(d=>d.addEventListener('click',()=>App.pick()));
-(function(){
-  let n=0; const ov=$('overlay'), hasFiles=e=>e.dataTransfer&&[...e.dataTransfer.types].includes('Files');
-  window.addEventListener('dragenter',e=>{ if(!hasFiles(e)) return; e.preventDefault(); n++; ov.classList.add('show'); });
-  window.addEventListener('dragover',e=>{ if(hasFiles(e)) e.preventDefault(); });
-  window.addEventListener('dragleave',e=>{ if(!hasFiles(e)) return; if(--n<=0){n=0;ov.classList.remove('show');} });
-  window.addEventListener('drop',e=>{ if(!hasFiles(e)) return; e.preventDefault(); n=0; ov.classList.remove('show'); App.setFile(e.dataTransfer.files[0]); });
-})();
-function reg(id,t){ App.tools[id]=Object.assign({loadedVer:-1},t); }
+/* --- mở file --- */
+function pickFile() { const f = $('#gfile'); f.value = ''; f.click(); }
+function openFile(file) {
+  if (!isImg(file)) return;
+  readDataURL(file, url => loadImg(url, img => {
+    App.closeTool();
+    const c = newCanvas(img.naturalWidth || img.width, img.naturalHeight || img.height);
+    c.getContext('2d').drawImage(img, 0, 0);
+    App.setImage(c, file);
+    if (App.pendingTool) { const p = App.pendingTool; App.pendingTool = null; App.openTool(p); }
+  }));
+}
+$('#gfile').addEventListener('change', e => openFile(e.target.files[0]));
+$('#btn-open').onclick = pickFile;
+$('#drop').onclick = pickFile;
+$('#btn-undo').onclick = () => App.undo();
+$$('.tool-btn').forEach(b => b.onclick = () => App.openTool(b.dataset.tool));
+$('#sheet-done').onclick = () => App.commitAndClose();
 
-/* ===== Điều hướng ===== */
-(function(){
-  const nav=$('nav'), tools=[...document.querySelectorAll('.tool')];
-  tools.forEach(t=>{
-    const b=document.createElement('button'); b.dataset.id=t.id;
-    b.innerHTML=`<span class="ic">${t.dataset.icon}</span><span>${t.dataset.title}</span>`;
-    b.onclick=()=>show(t.id); nav.appendChild(b);
+/* --- kéo thả --- */
+(function () {
+  let n = 0;
+  const ov = $('#dropzone-hint');
+  const hasFiles = e => e.dataTransfer && Array.from(e.dataTransfer.types).includes('Files');
+  window.addEventListener('dragenter', e => { if (!hasFiles(e)) return; e.preventDefault(); n++; ov.classList.add('show'); });
+  window.addEventListener('dragover', e => { if (hasFiles(e)) e.preventDefault(); });
+  window.addEventListener('dragleave', e => {
+    if (!hasFiles(e)) return;
+    if (--n <= 0) { n = 0; ov.classList.remove('show'); }
   });
-  function show(id){
-    App.flush(false);
-    tools.forEach(t=>t.classList.toggle('active',t.id===id));
-    nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
-    App.cur=App.tools[id]; App.sync(App.cur);
-    try{ history.replaceState(null,'','#'+id.replace('tool-','')); }catch(e){}
-    window.scrollTo(0,0); setTimeout(()=>window.dispatchEvent(new Event('resize')),30);
+  window.addEventListener('drop', e => {
+    if (!hasFiles(e)) return;
+    e.preventDefault(); n = 0; ov.classList.remove('show');
+    openFile(e.dataTransfer.files[0]);
+  });
+})();
+
+/* ======================================================================
+   XUẤT ẢNH (WebP / PNG — giống bản gốc)
+   ====================================================================== */
+(function () {
+  const modal = $('#export-modal'), fmt = $('#export-format'), q = $('#export-q'), qv = $('#export-q-v');
+  const qWrap = $('#export-q-wrap'), size = $('#export-size');
+  let timer = 0;
+  const isWebp = () => fmt.value === 'webp';
+
+  function estimate() {
+    clearTimeout(timer);
+    size.textContent = '…';
+    timer = setTimeout(() => {
+      if (!App.canvas) { size.textContent = '—'; return; }
+      const f = fmt.value, quality = parseInt(q.value, 10) / 100;
+      App.canvas.toBlob(blob => {
+        size.textContent = blob ? fmtBytes(blob.size) : '—';
+      }, 'image/' + f, f === 'webp' ? quality : undefined);
+    }, 220);
   }
-  window.__show=show;
-  const h='tool-'+location.hash.slice(1);
-  window.addEventListener('load',()=>show(tools.some(t=>t.id===h)?h:tools[0].id));
-})();
 
-/* ===== 1. CẮT ẢNH ===== */
-(function(){
-  const R=refs($('tool-crop')); let cropper=null;
-  reg('tool-crop',{
-    load(c){
-      R.drop.classList.add('hidden'); R.wrap.classList.remove('hidden');
-      if(cropper){ cropper.destroy(); cropper=null; }
-      R.img.src=c.toDataURL('image/png');
-      cropper=new Cropper(R.img,{aspectRatio:NaN,viewMode:1,dragMode:'move',autoCropArea:.8,restore:false,highlight:false,toggleDragModeOnDblclick:false,
-        ready(){ const d=cropper.getImageData(); R.orig.textContent=`${Math.round(d.naturalWidth)} × ${Math.round(d.naturalHeight)} px`; R.status.textContent='Sẵn sàng cắt'; R.stats.classList.remove('hidden'); }});
-      R.crop.disabled=R.reset.disabled=false;
-    }
-  });
-  R.crop.onclick=()=>{
-    if(!cropper) return;
-    const c=cropper.getCroppedCanvas({imageSmoothingQuality:'high'});
-    App.setCanvas(c,true); R.status.textContent='Đã cắt xong';
+  const savedFmt = localStorage.getItem('kropix_fmt'), savedQ = localStorage.getItem('kropix_q');
+  if (savedFmt === 'png' || savedFmt === 'webp') fmt.value = savedFmt;
+  if (savedQ) q.value = savedQ;
+  qv.textContent = q.value + '%';
+  qWrap.classList.toggle('hidden', !isWebp());
+
+  fmt.onchange = () => {
+    localStorage.setItem('kropix_fmt', fmt.value);
+    qWrap.classList.toggle('hidden', !isWebp());
+    estimate();
   };
-  R.reset.onclick=()=>{ if(cropper){ cropper.reset(); R.status.textContent='Đã đặt lại khung'; setTimeout(()=>R.status.textContent='Sẵn sàng cắt',2000); } };
+  q.oninput = () => {
+    qv.textContent = q.value + '%';
+    localStorage.setItem('kropix_q', q.value);
+    if (isWebp()) estimate();
+  };
+
+  $('#btn-dl').onclick = () => {
+    App.commitAndClose();
+    if (!App.canvas) return;
+    modal.classList.remove('hidden');
+    estimate();
+  };
+  $('#export-cancel').onclick = () => modal.classList.add('hidden');
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.add('hidden'); });
+
+  $('#export-go').onclick = () => {
+    const f = fmt.value, quality = (parseInt(q.value, 10) || 85) / 100;
+    modal.classList.add('hidden');
+    App.canvas.toBlob(blob => {
+      if (!blob) return;
+      let ext = f;
+      if (f === 'webp' && blob.type !== 'image/webp') ext = 'png';
+      downloadURL(URL.createObjectURL(blob), App.name + '.' + ext);
+    }, 'image/' + f, quality);
+  };
 })();
 
-/* ===== 3. ĐỔI KÍCH THƯỚC ===== */
-(function(){
-  const R=refs($('tool-resize')), ctx=R.canvas.getContext('2d'); let base=null, ow=0, oh=0;
-  function size(){
-    let w=parseInt(R.w.value)||ow, h=parseInt(R.h.value)||oh;
-    if(R.noEnlarge.checked){ w=Math.min(w,ow); h=Math.min(h,oh); }
-    return {w:Math.max(1,Math.min(10000,w)), h:Math.max(1,Math.min(10000,h))};
-  }
-  function render(){
-    if(!base) return; const {w,h}=size(); let dw=w, dh=h;
-    if(w>800||h>800){ const s=Math.min(800/w,800/h); dw=Math.max(1,Math.round(w*s)); dh=Math.max(1,Math.round(h*s)); }
-    R.canvas.width=dw; R.canvas.height=dh; ctx.clearRect(0,0,dw,dh);
-    ctx.imageSmoothingQuality='high'; ctx.drawImage(base,0,0,dw,dh);
-    R.newInfo.classList.remove('hidden'); R.newInfo.innerHTML=`<div class="stat" style="border:none"><span>Kích thước sau khi đổi</span><span>${w} × ${h} px</span></div>`;
-  }
-  function out(){ const {w,h}=size(), c=newCanvas(w,h), x=c.getContext('2d'); x.imageSmoothingQuality='high'; x.drawImage(base,0,0,w,h); return c; }
-  reg('tool-resize',{
-    load(c){
-      base=c; ow=c.width; oh=c.height; R.w.value=ow; R.h.value=oh;
-      R.w.disabled=R.h.disabled=R.reset.disabled=false; R.drop.classList.add('hidden'); R.canvas.classList.remove('hidden');
-      R.orig.innerHTML=`<div class="stat"><span>Kích thước gốc</span><span>${ow} × ${oh} px</span></div><div class="stat"><span>Dung lượng</span><span>${App.file?fmtBytes(App.file.size):'—'}</span></div>`;
-      render();
-    },
-    dirty(){ if(!base) return false; const {w,h}=size(); return w!==ow||h!==oh; },
-    commit(){ return out(); }
-  });
-  [R.w,R.h].forEach(i=>i.oninput=render); R.noEnlarge.onchange=render;
-  R.reset.onclick=()=>{ R.w.value=ow; R.h.value=oh; render(); };
-  R.presets.querySelectorAll('button').forEach(b=>b.onclick=()=>{ if(!base) return; R.w.value=b.dataset.w; R.h.value=b.dataset.h; render(); });
-})();
-
-/* ===== 5. LẬT & XOAY ===== */
-(function(){
-  const R=refs($('tool-flip')); let base=null, fh=false, fv=false, rot=0;
-  const norm=()=>((rot%360)+360)%360;
-  function upd(){
-    R.img.style.transform=`rotate(${rot}deg) scale(${fh?-1:1},${fv?-1:1})`;
-    R.sh.textContent=fh?'Bật':'Tắt'; R.sv.textContent=fv?'Bật':'Tắt'; R.sr.textContent=norm()+'°';
-  }
-  reg('tool-flip',{
-    load(c){ base=c; R.img.width=c.width; R.img.height=c.height; R.img.getContext('2d').drawImage(c,0,0); R.drop.classList.add('hidden'); R.img.classList.remove('hidden'); fh=fv=false; rot=0; upd(); },
-    dirty(){ return !!base&&(fh||fv||norm()!==0); },
-    commit(){
-      const n=norm(), sw=n===90||n===270, w=base.width, h=base.height, c=newCanvas(sw?h:w,sw?w:h), x=c.getContext('2d');
-      x.translate(c.width/2,c.height/2); x.rotate(n*Math.PI/180); x.scale(fh?-1:1,fv?-1:1); x.drawImage(base,-w/2,-h/2,w,h); return c;
+/* ======================================================================
+   BỘ LỌC MÀU THỦ CÔNG (thay ctx.filter — chạy được trên mọi máy)
+   ====================================================================== */
+function filterCanvas(src, brightness, contrast, saturation) {
+  const w = src.width, h = src.height;
+  const c = newCanvas(w, h), ctx = c.getContext('2d');
+  ctx.drawImage(src, 0, 0);
+  if (!brightness && !contrast && !saturation) return c;
+  const data = ctx.getImageData(0, 0, w, h);
+  const d = data.data;
+  const bf = 1 + brightness / 100;                       /* như brightness(%) */
+  const cf = 1 + contrast / 100;                         /* như contrast(%) */
+  const sf = 1 + saturation / 100;                       /* như saturate(%) */
+  for (let i = 0; i < d.length; i += 4) {
+    let r = d[i] * bf, g = d[i + 1] * bf, b = d[i + 2] * bf;
+    if (cf !== 1) { r = (r - 128) * cf + 128; g = (g - 128) * cf + 128; b = (b - 128) * cf + 128; }
+    if (sf !== 1) {
+      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      r = lum + (r - lum) * sf; g = lum + (g - lum) * sf; b = lum + (b - lum) * sf;
     }
-  });
-  const g=f=>()=>{ if(base){ f(); upd(); } };
-  R.fh.onclick=g(()=>fh=!fh); R.fv.onclick=g(()=>fv=!fv);
-  R.rl.onclick=g(()=>rot-=90); R.rr.onclick=g(()=>rot+=90); R.r180.onclick=g(()=>rot+=180);
-  R.reset.onclick=g(()=>{fh=fv=false;rot=0;});
-  upd();
+    d[i] = r < 0 ? 0 : r > 255 ? 255 : r;
+    d[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
+    d[i + 2] = b < 0 ? 0 : b > 255 ? 255 : b;
+  }
+  ctx.putImageData(data, 0, 0);
+  return c;
+}
+
+/* ======================================================================
+   CÁC CÔNG CỤ
+   ====================================================================== */
+const TOOLS = {};
+
+/* ---------------------------------------------------------------- 1. CẮT */
+(function () {
+  let cropper = null;
+
+  TOOLS.crop = {
+    title: 'Cắt ảnh',
+    panel: `<p class="hint" style="margin:0 0 12px">Kéo khung để chọn vùng cần giữ, kéo trong khung để di chuyển ảnh. Chụm hai ngón (hoặc cuộn chuột) để phóng to / thu nhỏ. Ảnh sau khi cắt sẽ trở thành ảnh hiện tại.</p>
+      <div class="btns">
+        <button class="btn reset-control" data-act="reset">↺ Đặt lại khung</button>
+        <button class="btn primary" data-act="apply">✂️ Cắt ảnh</button>
+      </div>`,
+    init(el) {
+      el.querySelector('[data-act="reset"]').onclick = () => { if (cropper) cropper.reset(); };
+      el.querySelector('[data-act="apply"]').onclick = () => TOOLS.crop.apply();
+    },
+    enter() {
+      const view = $('#view'), img = $('#crop-img'), wrap = $('#canvas-wrap'), holder = $('#crop-holder'), vp = $('#viewport');
+      wrap.classList.add('cropping');
+      view.classList.add('hidden');
+      holder.classList.remove('hidden');
+      /* khung cắt chỉ chiếm ~2/3 vùng xem để phần chỉnh sửa bên dưới vẫn dùng được */
+      const vw = vp.clientWidth || 320, vh = vp.clientHeight || 320;
+      holder.style.width = Math.max(100, vw - 20) + 'px';
+      holder.style.height = Math.round(Math.max(100, vh * 0.66)) + 'px';
+      img.onload = () => {
+        if (cropper) { cropper.destroy(); cropper = null; }
+        cropper = new Cropper(img, {
+          aspectRatio: NaN, viewMode: 1, dragMode: 'move',
+          autoCropArea: 0.8, restore: false, highlight: false,
+          toggleDragModeOnDblclick: false, checkOrientation: false,
+          background: false, responsive: true,
+          zoomOnWheel: true, wheelZoomRatio: 0.08
+        });
+      };
+      img.src = App.canvas.toDataURL('image/png');
+    },
+    leave() {
+      if (cropper) { cropper.destroy(); cropper = null; }
+      const img = $('#crop-img'), holder = $('#crop-holder');
+      holder.classList.add('hidden');
+      holder.style.width = holder.style.height = '';
+      img.removeAttribute('src');
+      $('#canvas-wrap').classList.remove('cropping');
+      $('#view').classList.remove('hidden');
+    },
+    apply() {
+      if (!cropper) { App.closeTool(); return; }
+      const c = cropper.getCroppedCanvas({ imageSmoothingQuality: 'high' });
+      App.closeTool();
+      if (c && c.width && c.height) App.setCanvas(c);
+    }
+  };
 })();
 
-/* ===== 6. MAGIC BRUSH (xóa nền thủ công) ===== */
-(function(){
-  const root=$('tool-brush'), R=refs(root), cv=R.canvas, ctx=cv.getContext('2d'), dot=$('brush-dot'), prev=$('brush-preview');
-  let mode='erase', orig=null, hist=[], drawing=false, has=false, last=null, dirty=false;
-  const col=()=>mode==='erase'?['#ef6a5a','rgba(239,106,90,.14)']:['#4fa3f7','rgba(79,163,247,.14)'];
-  function applyCol(){ const [b,g]=col(); [dot,prev].forEach(e=>{e.style.borderColor=b;e.style.backgroundColor=g;}); }
-  function setMode(m){ mode=m; R.mErase.classList.toggle('on',m==='erase'); R.mRestore.classList.toggle('on',m==='restore'); applyCol(); }
-  R.mErase.onclick=()=>setMode('erase'); R.mRestore.onclick=()=>setMode('restore'); applyCol();
-  function showPrev(){
-    const s=+R.size.value; R.sizeL.textContent=s+'px'; const r=cv.getBoundingClientRect(); const k=cv.width&&r.width?r.width/cv.width:1;
-    prev.style.width=prev.style.height=s*k+'px'; R.ptag.textContent=s+'px'; prev.classList.add('show');
-  }
-  const hidePrev=()=>prev.classList.remove('show');
-  R.size.addEventListener('input',showPrev);
-  ['pointerup','mouseup','touchend','keyup','blur'].forEach(e=>R.size.addEventListener(e,hidePrev));
-  reg('tool-brush',{
-    load(c){
-      const w=scaledCopy(c,2400); cv.width=w.width; cv.height=w.height; ctx.clearRect(0,0,cv.width,cv.height); ctx.drawImage(w,0,0);
-      orig=copyCanvas(cv); hist=[]; has=true; dirty=false; R.drop.classList.add('hidden'); cv.classList.remove('hidden'); R.undo.disabled=true; R.reset.disabled=false;
+/* ------------------------------------------------------- 2. KÍCH THƯỚC */
+(function () {
+  let base = null, ow = 0, oh = 0, els = null;
+
+  TOOLS.resize = {
+    title: 'Đổi kích thước',
+    panel: `<div class="two field">
+        <div><label class="lbl">Rộng (px)</label><input type="number" min="1" max="10000" data-r="w"></div>
+        <div><label class="lbl">Cao (px)</label><input type="number" min="1" max="10000" data-r="h"></div>
+      </div>
+      <label class="check"><input type="checkbox" data-r="noEnlarge"> Không phóng to quá kích thước gốc</label>
+      <label class="lbl">Kích thước có sẵn</label>
+      <div class="presets">
+        <button class="btn sm" data-w="1920" data-h="1080">1920×1080</button>
+        <button class="btn sm" data-w="1280" data-h="720">1280×720</button>
+        <button class="btn sm" data-w="1080" data-h="1080">1080×1080</button>
+        <button class="btn sm" data-w="800" data-h="600">800×600</button>
+        <button class="btn sm" data-w="512" data-h="512">512×512</button>
+        <button class="btn sm" data-w="100" data-h="100">100×100</button>
+      </div>
+      <p class="hint" data-r="info"></p>
+      <div class="btns" style="margin-top:12px">
+        <button class="btn reset-control" data-act="reset">↺ Đặt lại kích thước gốc</button>
+        <button class="btn primary" data-act="apply">Áp dụng</button>
+      </div>`,
+    init(el) {
+      els = {
+        w: el.querySelector('[data-r="w"]'),
+        h: el.querySelector('[data-r="h"]'),
+        noEnlarge: el.querySelector('[data-r="noEnlarge"]'),
+        info: el.querySelector('[data-r="info"]')
+      };
+      els.w.oninput = () => TOOLS.resize.render();
+      els.h.oninput = () => TOOLS.resize.render();
+      els.noEnlarge.onchange = () => TOOLS.resize.render();
+      el.querySelector('[data-act="reset"]').onclick = () => { els.w.value = ow; els.h.value = oh; TOOLS.resize.render(); };
+      el.querySelectorAll('[data-w]').forEach(b => b.onclick = () => {
+        els.w.value = b.dataset.w; els.h.value = b.dataset.h; TOOLS.resize.render();
+      });
+      el.querySelector('[data-act="apply"]').onclick = () => TOOLS.resize.apply();
     },
-    dirty:()=>dirty, commit:()=>copyCanvas(cv)
-  });
-  function pos(e){ const r=cv.getBoundingClientRect(), p=e.touches?e.touches[0]:e; return {x:(p.clientX-r.left)*cv.width/r.width, y:(p.clientY-r.top)*cv.height/r.height}; }
-  function paint(x,y){
-    const r=+R.size.value/2;
-    ctx.save(); ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
-    if(mode==='erase'){ ctx.globalCompositeOperation='destination-out'; ctx.fill(); } else { ctx.clip(); ctx.drawImage(orig,0,0); }
+    size() {
+      let w = parseInt(els.w.value, 10) || ow;
+      let h = parseInt(els.h.value, 10) || oh;
+      if (els.noEnlarge.checked) { w = Math.min(w, ow); h = Math.min(h, oh); }
+      return { w: clamp(w, 1, 10000), h: clamp(h, 1, 10000) };
+    },
+    enter() {
+      base = App.canvas; ow = base.width; oh = base.height;
+      els.w.value = ow; els.h.value = oh;
+      this.render();
+    },
+    render() {
+      if (!base) return;
+      const { w, h } = this.size();
+      const view = $('#view');
+      const s = Math.min(1, VIEW_MAX / Math.max(w, h));
+      view.width = Math.round(w * s);
+      view.height = Math.round(h * s);
+      const x = view.getContext('2d');
+      x.clearRect(0, 0, view.width, view.height);
+      x.imageSmoothingQuality = 'high';
+      x.drawImage(base, 0, 0, view.width, view.height);
+      els.info.textContent = 'Kích thước sau khi đổi: ' + w + ' × ' + h + ' px (ảnh gốc ' + ow + ' × ' + oh + ' px)';
+    },
+    dirty() { return !!base && (this.size().w !== ow || this.size().h !== oh); },
+    discard() { els.w.value = ow; els.h.value = oh; this.render(); },
+    leave() { },
+    apply() {
+      const { w, h } = this.size();
+      if (w === ow && h === oh) { App.closeTool(); return; }
+      const c = newCanvas(w, h);
+      const x = c.getContext('2d');
+      x.imageSmoothingQuality = 'high';
+      x.drawImage(base, 0, 0, w, h);
+      App.closeTool();
+      App.setCanvas(c);
+    }
+  };
+})();
+
+/* --------------------------------------------------------- 3. LẬT & XOAY */
+(function () {
+  let base = null, fh = false, fv = false, rot = 0;
+  const norm = () => ((rot % 360) + 360) % 360;
+
+  TOOLS.flip = {
+    title: 'Lật & xoay',
+    panel: `<div class="grid2">
+        <button class="btn" data-act="fh">⇋ Lật trái–phải</button>
+        <button class="btn" data-act="fv">⇅ Lật trên–dưới</button>
+        <button class="btn" data-act="rl">↺ Xoay 90° trái</button>
+        <button class="btn" data-act="rr">↻ Xoay 90° phải</button>
+        <button class="btn" data-act="r180" style="grid-column:span 2">⟲ Xoay 180°</button>
+      </div>
+      <p class="hint" data-r="state"></p>
+      <div class="btns" style="margin-top:12px">
+        <button class="btn reset-control" data-act="reset">↺ Đặt lại</button>
+        <button class="btn primary" data-act="apply">Áp dụng</button>
+      </div>`,
+    init(el) {
+      const g = fn => () => { if (!base) return; fn(); TOOLS.flip.render(); };
+      el.querySelector('[data-act="fh"]').onclick = g(() => fh = !fh);
+      el.querySelector('[data-act="fv"]').onclick = g(() => fv = !fv);
+      el.querySelector('[data-act="rl"]').onclick = g(() => rot -= 90);
+      el.querySelector('[data-act="rr"]').onclick = g(() => rot += 90);
+      el.querySelector('[data-act="r180"]').onclick = g(() => rot += 180);
+      el.querySelector('[data-act="reset"]').onclick = g(() => { fh = fv = false; rot = 0; });
+      el.querySelector('[data-act="apply"]').onclick = () => TOOLS.flip.apply();
+    },
+    enter() { base = App.canvas; fh = fv = false; rot = 0; this.render(); },
+    out() {
+      const n = norm(), swap = n === 90 || n === 270;
+      return { w: swap ? base.height : base.width, h: swap ? base.width : base.height, n: n };
+    },
+    render() {
+      if (!base) return;
+      const o = this.out();
+      const view = $('#view');
+      const s = Math.min(1, VIEW_MAX / Math.max(o.w, o.h));
+      view.width = Math.round(o.w * s);
+      view.height = Math.round(o.h * s);
+      const x = view.getContext('2d');
+      x.clearRect(0, 0, view.width, view.height);
+      x.imageSmoothingQuality = 'high';
+      x.save();
+      x.translate(view.width / 2, view.height / 2);
+      x.rotate(o.n * Math.PI / 180);
+      x.scale(fh ? -1 : 1, fv ? -1 : 1);
+      x.drawImage(base, -base.width * s / 2, -base.height * s / 2, base.width * s, base.height * s);
+      x.restore();
+      const st = $('#sheet-body').querySelector('[data-r="state"]');
+      if (st) st.textContent = 'Lật ngang: ' + (fh ? 'Bật' : 'Tắt') + ' · Lật dọc: ' + (fv ? 'Bật' : 'Tắt') + ' · Góc xoay: ' + o.n + '°';
+    },
+    dirty() { return !!base && (fh || fv || norm() !== 0); },
+    discard() { fh = fv = false; rot = 0; this.render(); },
+    leave() { },
+    apply() {
+      if (!base || !this.dirty()) { App.closeTool(); return; }
+      const o = this.out();
+      const c = newCanvas(o.w, o.h);
+      const x = c.getContext('2d');
+      x.imageSmoothingQuality = 'high';
+      x.translate(c.width / 2, c.height / 2);
+      x.rotate(o.n * Math.PI / 180);
+      x.scale(fh ? -1 : 1, fv ? -1 : 1);
+      x.drawImage(base, -base.width / 2, -base.height / 2);
+      App.closeTool();
+      App.setCanvas(c);
+    }
+  };
+})();
+
+/* --------------------------------------------------------- 4. XÓA NỀN CỌ */
+(function () {
+  let mode = 'erase', size = 35, base = null, view = null, orig = null, mask = null;
+  let strokes = [], drawing = false, last = null, els = null;
+
+  /* --- vòng xem trước cỡ cọ (như tool.html) --- */
+  function previewSize() {
+    if (!view || !view.width) return 0;
+    const r = view.getBoundingClientRect();
+    return Math.max(4, size * (r.width / view.width));
+  }
+  function showPreview() {
+    const el = $('#brush-preview');
+    if (!el) return;
+    const d = previewSize();
+    el.style.width = el.style.height = d + 'px';
+    el.classList.toggle('restore', mode === 'restore');
+    el.classList.add('show');
+    const lab = $('#brush-preview-label');
+    if (lab) lab.textContent = size + 'px';
+  }
+  function hidePreview() {
+    const el = $('#brush-preview');
+    if (el) el.classList.remove('show');
+  }
+
+  function paintDab(ctx, x, y, r, m) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    if (m === 'erase') { ctx.fillStyle = '#fff'; ctx.fill(); }
+    else { ctx.globalCompositeOperation = 'destination-out'; ctx.fill(); }
     ctx.restore();
   }
-  function stroke(a,b){ const step=Math.max(1,+R.size.value/4), d=Math.hypot(b.x-a.x,b.y-a.y), n=Math.max(1,Math.ceil(d/step)); for(let i=1;i<=n;i++) paint(a.x+(b.x-a.x)*i/n,a.y+(b.y-a.y)*i/n); }
-  function save(){ if(hist.length>8) hist.shift(); hist.push(ctx.getImageData(0,0,cv.width,cv.height)); R.undo.disabled=false; dirty=true; }
-  function cursor(e){
-    const r=cv.getBoundingClientRect(), p=e.touches?e.touches[0]:e, s=+R.size.value*r.width/cv.width;
-    applyCol(); dot.style.display='block'; dot.style.width=dot.style.height=s+'px'; dot.style.left=p.clientX-s/2+'px'; dot.style.top=p.clientY-s/2+'px';
+
+  function repaintMask() {
+    const mc = mask.getContext('2d');
+    mc.clearRect(0, 0, mask.width, mask.height);
+    const r = size / 2;
+    strokes.forEach(st => st.pts.forEach(p => paintDab(mc, p.x, p.y, st.size / 2, st.mode)));
   }
-  cv.addEventListener('mousedown',e=>{ if(!has) return; e.preventDefault(); save(); drawing=true; last=pos(e); paint(last.x,last.y); });
-  cv.addEventListener('mousemove',e=>{ cursor(e); if(!drawing) return; const p=pos(e); stroke(last,p); last=p; });
-  window.addEventListener('mouseup',()=>drawing=false);
-  cv.addEventListener('touchstart',e=>{ if(!has) return; e.preventDefault(); save(); drawing=true; last=pos(e); paint(last.x,last.y); },{passive:false});
-  cv.addEventListener('touchmove',e=>{ e.preventDefault(); if(!drawing) return; const p=pos(e); stroke(last,p); last=p; },{passive:false});
-  window.addEventListener('touchend',()=>drawing=false);
-  cv.addEventListener('mouseleave',()=>dot.style.display='none');
-  R.undo.onclick=()=>{ if(!hist.length) return; ctx.putImageData(hist.pop(),0,0); R.undo.disabled=!hist.length; };
-  R.reset.onclick=()=>{ if(!orig) return; save(); ctx.clearRect(0,0,cv.width,cv.height); ctx.drawImage(orig,0,0); };
-})();
 
-/* ===== 7. SÁNG / TƯƠNG PHẢN / BÃO HÒA ===== */
-(function(){
-  const R=refs($('tool-adjust')), cv=R.canvas, ctx=cv.getContext('2d'), sl={brightness:R.brightness,contrast:R.contrast,saturation:R.saturation};
-  const lab={brightness:R.bv,contrast:R.cv,saturation:R.sv}; let src=null;
-  const resets=$('tool-adjust').querySelectorAll('.reset1');
-  const filt=()=>`brightness(${100+ +sl.brightness.value}%) contrast(${100+ +sl.contrast.value}%) saturate(${100+ +sl.saturation.value}%)`;
-  const changed=()=>Object.values(sl).some(s=>+s.value!==0);
-  function render(){ if(!src) return; ctx.filter=filt(); ctx.clearRect(0,0,cv.width,cv.height); ctx.drawImage(src,0,0,cv.width,cv.height); }
-  function labels(){ for(const k in sl) lab[k].textContent=sl[k].value; resets.forEach(b=>b.disabled=+sl[b.dataset.t].value===0); }
-  reg('tool-adjust',{
-    load(c){ src=c; const s=c.width>1400?1400/c.width:1; cv.width=Math.round(c.width*s); cv.height=Math.round(c.height*s);
-      Object.values(sl).forEach(x=>x.value=0); labels(); R.drop.classList.add('hidden'); cv.classList.remove('hidden'); render(); },
-    dirty:()=>!!src&&changed(),
-    commit(){ const c=newCanvas(src.width,src.height), x=c.getContext('2d'); x.filter=filt(); x.drawImage(src,0,0); return c; }
-  });
-  Object.values(sl).forEach(s=>s.oninput=()=>{labels();render();});
-  resets.forEach(b=>b.onclick=()=>{ sl[b.dataset.t].value=0; labels(); render(); });
-  labels();
-})();
+  function renderView() {
+    const x = view.getContext('2d');
+    x.clearRect(0, 0, view.width, view.height);
+    x.imageSmoothingQuality = 'high';
+    x.drawImage(orig, 0, 0);
+    x.save();
+    x.globalCompositeOperation = 'destination-out';
+    x.drawImage(mask, 0, 0);
+    x.restore();
+  }
 
-/* ===== 8. VẼ LÊN ẢNH ===== */
-(function(){
-  const root=$('tool-draw'), R=refs(root), ic=R.img.getContext('2d'), dc=R.draw.getContext('2d');
-  let has=false, tool='pen', drawing=false, last=null, undo=[], redo=[], lastC=null, dirty=false;
-  const hbtn=()=>{R.undo.disabled=!undo.length; R.redo.disabled=!redo.length;};
-  const snap=()=>dc.getImageData(0,0,R.draw.width,R.draw.height);
-  reg('tool-draw',{
-    load(c){
-      const w=scaledCopy(c,2400); R.img.width=R.draw.width=w.width; R.img.height=R.draw.height=w.height; ic.clearRect(0,0,w.width,w.height); ic.drawImage(w,0,0); dc.clearRect(0,0,w.width,w.height);
-      has=true; undo=[]; redo=[]; dirty=false; hbtn(); R.drop.classList.add('hidden'); R.wrap.classList.remove('hidden'); R.clear.disabled=false;
-    },
-    dirty:()=>dirty,
-    commit(){ const o=newCanvas(R.img.width,R.img.height), x=o.getContext('2d'); x.drawImage(R.img,0,0); x.drawImage(R.draw,0,0); return o; }
-  });
-  root.querySelectorAll('.tools .btn').forEach(b=>b.onclick=()=>{ root.querySelectorAll('.tools .btn').forEach(x=>x.classList.remove('on')); b.classList.add('on'); tool=b.dataset.t; R.ring.className=tool; });
-  function pos(e){ const r=R.draw.getBoundingClientRect(); return {x:(e.clientX-r.left)*R.draw.width/r.width, y:(e.clientY-r.top)*R.draw.height/r.height}; }
-  function ring(x,y){ const r=R.draw.getBoundingClientRect(), s=+R.size.value*r.width/R.draw.width; R.ring.style.width=R.ring.style.height=s+'px'; R.ring.style.left=x-r.left+'px'; R.ring.style.top=y-r.top+'px'; }
-  R.size.oninput=()=>{ R.sizeV.textContent=R.size.value; if(lastC) ring(lastC.x,lastC.y); };
-  const setOp=()=>dc.globalCompositeOperation=tool==='eraser'?'destination-out':'source-over';
-  R.draw.addEventListener('pointerenter',e=>{ if(!has) return; lastC={x:e.clientX,y:e.clientY}; ring(e.clientX,e.clientY); R.ring.style.display='block'; });
-  R.draw.addEventListener('pointerleave',()=>{ R.ring.style.display='none'; lastC=null; });
-  R.draw.addEventListener('pointerdown',e=>{
-    if(!has) return; R.draw.setPointerCapture(e.pointerId); undo.push(snap()); if(undo.length>15) undo.shift(); redo=[]; hbtn(); dirty=true;
-    drawing=true; last=pos(e); setOp(); dc.fillStyle=R.color.value; dc.beginPath(); dc.arc(last.x,last.y,+R.size.value/2,0,Math.PI*2); dc.fill();
-  });
-  R.draw.addEventListener('pointermove',e=>{
-    lastC={x:e.clientX,y:e.clientY}; ring(e.clientX,e.clientY); if(!drawing) return; const p=pos(e);
-    setOp(); dc.strokeStyle=R.color.value; dc.lineWidth=+R.size.value; dc.lineCap=dc.lineJoin='round'; dc.beginPath(); dc.moveTo(last.x,last.y); dc.lineTo(p.x,p.y); dc.stroke(); last=p;
-  });
-  ['pointerup','pointercancel'].forEach(ev=>R.draw.addEventListener(ev,()=>drawing=false));
-  R.undo.onclick=()=>{ if(!undo.length) return; redo.push(snap()); dc.putImageData(undo.pop(),0,0); hbtn(); };
-  R.redo.onclick=()=>{ if(!redo.length) return; undo.push(snap()); dc.putImageData(redo.pop(),0,0); hbtn(); };
-  R.clear.onclick=()=>{ if(!has) return; undo.push(snap()); redo=[]; dc.clearRect(0,0,R.draw.width,R.draw.height); hbtn(); };
-})();
+  function syncButtons() {
+    if (!els) return;
+    els.undo.disabled = !strokes.length;
+    els.reset.disabled = !strokes.length;
+    els.reset.classList.toggle('reset-ready', strokes.length > 0);
+  }
 
-/* ===== 9. THÊM CHỮ ===== */
-(function(){
-  const R=refs($('tool-text')), cv=R.canvas, ctx=cv.getContext('2d'), D={fs:40,rot:0,sw:2};
-  let base=null, items=[], sel=null, idc=0, drag=null;
-  const cur=()=>items.find(t=>t.id===sel);
-  reg('tool-text',{
-    load(c){
-      base=c; let w=c.width,h=c.height; if(w>900){h=h*900/w;w=900;} cv.width=Math.round(w); cv.height=Math.round(h); ctx.drawImage(c,0,0,cv.width,cv.height);
-      R.drop.classList.add('hidden'); R.wrap.style.display='block'; R.add.disabled=false;
-      items=[]; sel=null; R.panel.classList.add('hidden'); R.del.disabled=true; render();
-    },
-    dirty:()=>!!base&&items.length>0,
-    commit(){
-      const o=copyCanvas(base), x=o.getContext('2d'), s=o.width/cv.width;
-      items.forEach(it=>{
-        x.save(); x.translate(it.x/100*o.width,it.y/100*o.height); x.rotate(it.rot*Math.PI/180); x.globalAlpha=it.op/100;
-        x.font=`${it.weight} ${it.fs*s}px ${it.family}`; x.textAlign='center'; x.textBaseline='middle';
-        if(it.stroke){ x.lineWidth=it.sw*s; x.strokeStyle=it.sc; x.strokeText(it.text,0,0); }
-        x.fillStyle=it.color; x.fillText(it.text,0,0); x.restore();
-      });
-      return o;
+  function paintPoint(x, y, m, sz) {
+    const r = sz / 2;
+    paintDab(mask.getContext('2d'), x, y, r, m);
+    const vc = view.getContext('2d');
+    if (m === 'erase') {
+      vc.save();
+      vc.globalCompositeOperation = 'destination-out';
+      vc.beginPath(); vc.arc(x, y, r, 0, Math.PI * 2); vc.fill();
+      vc.restore();
+    } else {
+      vc.save();
+      vc.beginPath(); vc.arc(x, y, r, 0, Math.PI * 2); vc.clip();
+      vc.drawImage(orig, 0, 0);
+      vc.restore();
     }
-  });
-  R.add.onclick=()=>{ const it={id:'t'+idc++,text:'Chữ của bạn',x:50,y:50,family:R.family.value,fs:D.fs,color:'#ffffff',weight:'bold',rot:D.rot,stroke:false,sc:'#000000',sw:D.sw,op:100}; items.push(it); select(it.id); render(); };
-  R.del.onclick=()=>{ if(!sel) return; items=items.filter(t=>t.id!==sel); sel=null; R.panel.classList.add('hidden'); R.del.disabled=true; render(); };
-  function select(id){
-    sel=id; const it=cur(); if(!it){R.panel.classList.add('hidden');R.del.disabled=true;return;}
-    R.panel.classList.remove('hidden'); R.del.disabled=false;
-    R.content.value=it.text; R.family.value=it.family; R.fs.value=it.fs; R.fsV.textContent=it.fs+'px'; R.rot.value=it.rot; R.rotV.textContent=it.rot+'°';
-    R.color.value=it.color; R.weight.value=it.weight; R.stroke.checked=it.stroke; R.strokeOpt.classList.toggle('hidden',!it.stroke);
-    R.strokeColor.value=it.sc; R.sw.value=it.sw; R.swV.textContent=it.sw+'px'; R.op.value=it.op; R.opV.textContent=it.op+'%';
   }
-  const set=(k,v)=>{ const it=cur(); if(it){it[k]=v; render();} };
-  R.content.oninput=e=>set('text',e.target.value);
-  R.family.onchange=e=>set('family',e.target.value);
-  R.fs.oninput=e=>{R.fsV.textContent=e.target.value+'px'; set('fs',+e.target.value);};
-  R.rot.oninput=e=>{R.rotV.textContent=e.target.value+'°'; set('rot',+e.target.value);};
-  R.color.oninput=e=>set('color',e.target.value);
-  R.weight.onchange=e=>set('weight',e.target.value);
-  R.stroke.onchange=e=>{R.strokeOpt.classList.toggle('hidden',!e.target.checked); set('stroke',e.target.checked);};
-  R.strokeColor.oninput=e=>set('sc',e.target.value);
-  R.sw.oninput=e=>{R.swV.textContent=e.target.value+'px'; set('sw',+e.target.value);};
-  R.op.oninput=e=>{R.opV.textContent=e.target.value+'%'; set('op',+e.target.value);};
-  R.fsR.onclick=()=>{R.fs.value=D.fs;R.fsV.textContent=D.fs+'px';set('fs',D.fs);};
-  R.rotR.onclick=()=>{R.rot.value=D.rot;R.rotV.textContent=D.rot+'°';set('rot',D.rot);};
-  R.swR.onclick=()=>{R.sw.value=D.sw;R.swV.textContent=D.sw+'px';set('sw',D.sw);};
-  function render(){
-    R.layer.innerHTML=''; const k=cv.clientWidth/cv.width||1;
-    items.forEach(it=>{
-      const el=document.createElement('div'); el.className='dt'+(it.id===sel?' sel':''); el.textContent=it.text;
-      Object.assign(el.style,{left:it.x+'%',top:it.y+'%',transform:`translate(-50%,-50%) rotate(${it.rot}deg)`,fontFamily:it.family,fontSize:it.fs*k+'px',color:it.color,fontWeight:it.weight,opacity:it.op/100});
-      el.style.webkitTextStroke=it.stroke?`${it.sw*k}px ${it.sc}`:'0px transparent';
-      el.dataset.id=it.id; el.addEventListener('mousedown',start); el.addEventListener('touchstart',start,{passive:false});
-      el.addEventListener('click',e=>{e.stopPropagation(); select(it.id); render();});
-      R.layer.appendChild(el);
+
+  function addPoint(x, y) {
+    const st = strokes[strokes.length - 1];
+    if (!st) return;
+    if (last) {
+      const step = Math.max(1, st.size * 0.25);
+      const d = Math.hypot(x - last.x, y - last.y);
+      const n = Math.max(1, Math.ceil(d / step));
+      for (let i = 1; i <= n; i++) {
+        const px = last.x + (x - last.x) * i / n;
+        const py = last.y + (y - last.y) * i / n;
+        st.pts.push({ x: px, y: py });
+        paintPoint(px, py, st.mode, st.size);
+      }
+    } else {
+      st.pts.push({ x: x, y: y });
+      paintPoint(x, y, st.mode, st.size);
+    }
+    last = { x: x, y: y };
+    syncButtons();
+  }
+
+  function pos(e) {
+    const r = view.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * view.width / r.width, y: (e.clientY - r.top) * view.height / r.height };
+  }
+
+  function showCursor(e) {
+    const el = $('#brush-cursor');
+    if (!el) return;
+    const r = view.getBoundingClientRect();
+    const d = size * (r.width / view.width);
+    el.style.width = el.style.height = d + 'px';
+    el.style.left = (e.clientX - r.left) + 'px';
+    el.style.top = (e.clientY - r.top) + 'px';
+    el.style.display = 'block';
+  }
+  function hideCursor() { const el = $('#brush-cursor'); if (el) el.style.display = 'none'; }
+
+  function onDown(e) {
+    if (!base) return;
+    if (e.isPrimary === false) return;
+    e.preventDefault();
+    hidePreview();
+    view.setPointerCapture(e.pointerId);
+    drawing = true;
+    last = null;
+    strokes.push({ mode: mode, size: size, pts: [] });
+    addPoint(pos(e).x, pos(e).y);
+    showCursor(e);
+  }
+  function onMove(e) {
+    if (!base) return;
+    showCursor(e);
+    if (!drawing) return;
+    e.preventDefault();
+    const p = pos(e);
+    addPoint(p.x, p.y);
+  }
+  function onUp() { drawing = false; last = null; }
+
+  TOOLS.brush = {
+    title: 'Xóa nền bằng cọ',
+    panel: `<div class="btns">
+        <button class="btn on" data-r="mErase">🖌 Xoá</button>
+        <button class="btn" data-r="mRestore">↩ Khôi phục</button>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <div class="lblrow"><span>Cỡ cọ</span><span class="val" data-r="sizeV">${size}px</span></div>
+        <input type="range" min="5" max="150" value="${size}" data-r="size">
+      </div>
+      <div class="btns">
+        <button class="btn reset-control" data-r="undo" disabled>↶ Hoàn tác nét</button>
+        <button class="btn reset-control" data-r="reset" disabled>↺ Đặt lại</button>
+      </div>
+      <p class="hint">Chạm và kéo trên ảnh để tô. "Xoá" (đỏ) làm vùng tô trong suốt, "Khôi phục" (xanh) vẽ lại phần đã xoá. Kéo thanh cỡ cọ để xem vòng tròn kích thước thật.</p>
+      <div class="btns" style="margin-top:12px"><button class="btn primary" data-act="apply">Áp dụng</button></div>`,
+    init(el) {
+      els = {
+        mErase: el.querySelector('[data-r="mErase"]'),
+        mRestore: el.querySelector('[data-r="mRestore"]'),
+        size: el.querySelector('[data-r="size"]'),
+        sizeV: el.querySelector('[data-r="sizeV"]'),
+        undo: el.querySelector('[data-r="undo"]'),
+        reset: el.querySelector('[data-r="reset"]')
+      };
+      const setMode = m => {
+        mode = m;
+        els.mErase.classList.toggle('on', m === 'erase');
+        els.mRestore.classList.toggle('on', m === 'restore');
+        const cur = $('#brush-cursor');
+        if (cur) cur.classList.toggle('restore', m === 'restore');
+        const pv = $('#brush-preview');
+        if (pv) pv.classList.toggle('restore', m === 'restore');
+      };
+      els.mErase.onclick = () => setMode('erase');
+      els.mRestore.onclick = () => setMode('restore');
+      setMode(mode);
+      els.size.oninput = () => {
+        size = +els.size.value;
+        els.sizeV.textContent = size + 'px';
+        showPreview();
+      };
+      ['pointerup', 'mouseup', 'touchend', 'change', 'blur'].forEach(ev => els.size.addEventListener(ev, hidePreview));
+      els.size.onchange = () => { size = +els.size.value; els.sizeV.textContent = size + 'px'; };
+      els.undo.onclick = () => TOOLS.brush.handleUndo();
+      els.reset.onclick = () => {
+        strokes = []; last = null;
+        repaintMask(); renderView(); syncButtons();
+      };
+      el.querySelector('[data-act="apply"]').onclick = () => TOOLS.brush.apply();
+    },
+    enter() {
+      base = App.canvas;
+      view = $('#view');
+      const work = scaledCopy(base, VIEW_MAX);
+      view.width = work.width; view.height = work.height;
+      const x = view.getContext('2d');
+      x.clearRect(0, 0, view.width, view.height);
+      x.imageSmoothingQuality = 'high';
+      x.drawImage(work, 0, 0);
+      orig = copyCanvas(view);
+      mask = newCanvas(view.width, view.height);
+      strokes = []; last = null; drawing = false;
+      view.style.cursor = 'none';
+      view.addEventListener('pointerdown', onDown);
+      view.addEventListener('pointermove', onMove);
+      view.addEventListener('pointerup', onUp);
+      view.addEventListener('pointercancel', onUp);
+      view.addEventListener('pointerleave', hideCursor);
+      syncButtons();
+    },
+    render() { if (orig) renderView(); },
+    dirty() { return strokes.length > 0; },
+    discard() { strokes = []; repaintMask(); renderView(); syncButtons(); },
+    handleUndo() {
+      if (!strokes.length) return false;
+      strokes.pop();
+      repaintMask(); renderView(); syncButtons();
+      return true;
+    },
+    leave() {
+      view.style.cursor = '';
+      view.removeEventListener('pointerdown', onDown);
+      view.removeEventListener('pointermove', onMove);
+      view.removeEventListener('pointerup', onUp);
+      view.removeEventListener('pointercancel', onUp);
+      view.removeEventListener('pointerleave', hideCursor);
+      hideCursor(); hidePreview();
+      els = null;
+    },
+    apply() {
+      if (!base || !strokes.length) { App.closeTool(); return; }
+      const c = newCanvas(base.width, base.height);
+      const x = c.getContext('2d');
+      x.imageSmoothingQuality = 'high';
+      x.drawImage(base, 0, 0);
+      x.save();
+      x.globalCompositeOperation = 'destination-out';
+      x.drawImage(mask, 0, 0, c.width, c.height);
+      x.restore();
+      strokes = [];
+      App.closeTool();
+      App.setCanvas(c);
+    }
+  };
+})();
+
+/* ------------------------------------------------------- 5. MÀU / SẮC ĐỘ */
+(function () {
+  let src = null, els = null, raf = 0;
+  let vals = { brightness: 0, contrast: 0, saturation: 0 };
+  const keys = ['brightness', 'contrast', 'saturation'];
+
+  function paint() {
+    if (!src) return;
+    const view = $('#view');
+    const source = src.width > 1400 ? scaledCopy(src, 1400) : src;
+    const out = filterCanvas(source, vals.brightness, vals.contrast, vals.saturation);
+    view.width = out.width;
+    view.height = out.height;
+    const x = view.getContext('2d');
+    x.clearRect(0, 0, view.width, view.height);
+    x.drawImage(out, 0, 0);
+  }
+
+  TOOLS.adjust = {
+    title: 'Điều chỉnh màu',
+    panel: `<div class="field">
+        <div class="lblrow"><span>Độ sáng</span><span><span class="val" data-r="bv">0</span><button class="reset1" data-t="brightness" disabled>Đặt lại</button></span></div>
+        <input type="range" min="-100" max="100" value="0" data-r="brightness">
+      </div>
+      <div class="field">
+        <div class="lblrow"><span>Độ tương phản</span><span><span class="val" data-r="cv">0</span><button class="reset1" data-t="contrast" disabled>Đặt lại</button></span></div>
+        <input type="range" min="-100" max="100" value="0" data-r="contrast">
+      </div>
+      <div class="field">
+        <div class="lblrow"><span>Độ bão hòa</span><span><span class="val" data-r="sv">0</span><button class="reset1" data-t="saturation" disabled>Đặt lại</button></span></div>
+        <input type="range" min="-100" max="100" value="0" data-r="saturation">
+      </div>
+      <p class="hint">Bấm "Đặt lại" ở từng thanh để đưa thông số đó về 0. Giá trị đã áp dụng được giữ nguyên khi mở lại.</p>
+      <div class="btns" style="margin-top:12px"><button class="btn primary" data-act="apply">Áp dụng</button></div>`,
+    init(el) {
+      els = {
+        brightness: el.querySelector('[data-r="brightness"]'),
+        contrast: el.querySelector('[data-r="contrast"]'),
+        saturation: el.querySelector('[data-r="saturation"]'),
+        bv: el.querySelector('[data-r="bv"]'),
+        cv: el.querySelector('[data-r="cv"]'),
+        sv: el.querySelector('[data-r="sv"]'),
+        resets: Array.from(el.querySelectorAll('.reset1'))
+      };
+      keys.forEach(k => { els[k].oninput = () => TOOLS.adjust.read(); });
+      els.resets.forEach(btn => {
+        btn.onclick = () => {
+          els[btn.dataset.t].value = 0;
+          TOOLS.adjust.read();
+        };
+      });
+      el.querySelector('[data-act="apply"]').onclick = () => TOOLS.adjust.apply();
+    },
+    enter() {
+      const cached = App._color;
+      if (cached && cached.out === App.canvas) {
+        src = cached.base;
+        vals = Object.assign({}, cached.vals);
+      } else {
+        src = App.canvas;
+        vals = { brightness: 0, contrast: 0, saturation: 0 };
+      }
+      keys.forEach(k => { els[k].value = vals[k]; });
+      this.read();
+    },
+    read() {
+      keys.forEach(k => { vals[k] = +els[k].value; });
+      els.bv.textContent = vals.brightness;
+      els.cv.textContent = vals.contrast;
+      els.sv.textContent = vals.saturation;
+      els.resets.forEach(btn => {
+        const k = btn.dataset.t;
+        btn.disabled = vals[k] === 0;
+        btn.classList.toggle('reset-ready', vals[k] !== 0);
+      });
+      if (raf) return;
+      raf = requestAnimationFrame(() => { raf = 0; paint(); });
+    },
+    render() { paint(); },
+    dirty() { return !!(src && keys.some(k => vals[k] !== 0)); },
+    discard() {
+      const cached = App._color;
+      const base = (cached && cached.out === App.canvas) ? cached.vals : { brightness: 0, contrast: 0, saturation: 0 };
+      vals = Object.assign({}, base);
+      keys.forEach(k => { els[k].value = vals[k]; });
+      this.read();
+    },
+    leave() { },
+    apply() {
+      if (!src) { App.closeTool(); return; }
+      const out = filterCanvas(src, vals.brightness, vals.contrast, vals.saturation);
+      const cached = App._color;
+      if (cached && cached.out === App.canvas) App.canvas = cached.base;   /* tránh chồng lớp lọc */
+      App.closeTool();
+      App.setCanvas(out);
+      App._color = { base: src, vals: Object.assign({}, vals), out: App.canvas };
+    }
+  };
+})();
+
+/* ------------------------------------------------------------- 6. VẼ */
+(function () {
+  let base = null, layer = null, view = null, lctx = null;
+  let strokes = [], redo = [], drawTool = 'pen', color = '#e8a33d', size = 8;
+  let drawing = false, lastPt = null, els = null, drawing2 = false;
+
+  function replay() {
+    lctx.clearRect(0, 0, layer.width, layer.height);
+    strokes.forEach(st => replayStroke(st));
+  }
+  function replayStroke(st) {
+    if (!st.pts.length) return;
+    lctx.save();
+    lctx.globalCompositeOperation = st.mode === 'eraser' ? 'destination-out' : 'source-over';
+    lctx.strokeStyle = st.color;
+    lctx.fillStyle = st.color;
+    lctx.lineWidth = st.size;
+    lctx.lineCap = lctx.lineJoin = 'round';
+    if (st.pts.length === 1) {
+      lctx.beginPath();
+      lctx.arc(st.pts[0].x, st.pts[0].y, st.size / 2, 0, Math.PI * 2);
+      lctx.fill();
+    } else {
+      lctx.beginPath();
+      lctx.moveTo(st.pts[0].x, st.pts[0].y);
+      for (let i = 1; i < st.pts.length; i++) lctx.lineTo(st.pts[i].x, st.pts[i].y);
+      lctx.stroke();
+    }
+    lctx.restore();
+  }
+  function renderView() {
+    if (!base) return;
+    const s = Math.min(1, VIEW_MAX / Math.max(base.width, base.height));
+    view.width = Math.round(base.width * s);
+    view.height = Math.round(base.height * s);
+    const x = view.getContext('2d');
+    x.clearRect(0, 0, view.width, view.height);
+    x.imageSmoothingQuality = 'high';
+    x.drawImage(base, 0, 0, view.width, view.height);
+    x.drawImage(layer, 0, 0, view.width, view.height);
+  }
+  function sync() {
+    if (!els) return;
+    els.undo.disabled = !strokes.length;
+    els.redo.disabled = !redo.length;
+    els.clear.disabled = !strokes.length;
+    els.clear.classList.toggle('reset-ready', strokes.length > 0);
+  }
+  function pt(e) {
+    const r = view.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * layer.width / r.width, y: (e.clientY - r.top) * layer.height / r.height };
+  }
+  function strokeScale() { return layer.width / view.width; }
+  function showRing(e) {
+    const el = $('#draw-ring');
+    const r = view.getBoundingClientRect();
+    const s = size * strokeScale() * (r.width / view.width);
+    el.style.width = el.style.height = s + 'px';
+    el.style.left = (e.clientX - r.left) + 'px';
+    el.style.top = (e.clientY - r.top) + 'px';
+    el.style.display = 'block';
+  }
+  function onDown(e) {
+    if (!base || e.isPrimary === false) return;
+    e.preventDefault();
+    view.setPointerCapture(e.pointerId);
+    drawing = true;
+    redo = [];
+    const p = pt(e);
+    lastPt = p;
+    strokes.push({ mode: drawTool, color: color, size: size * strokeScale(), pts: [p] });
+    const st = strokes[strokes.length - 1];
+    replayStroke(st);
+    renderView();
+    showRing(e);
+    sync();
+  }
+  function onMove(e) {
+    if (!base) return;
+    showRing(e);
+    if (!drawing) return;
+    e.preventDefault();
+    const p = pt(e);
+    const st = strokes[strokes.length - 1];
+    const step = Math.max(1, size * strokeScale() * 0.25);
+    /* nội suy để nét mượt, không bị đứt khi kéo nhanh */
+    const d = Math.hypot(p.x - lastPt.x, p.y - lastPt.y);
+    const n = Math.max(1, Math.ceil(d / step));
+    for (let i = 1; i <= n; i++) {
+      const q = { x: lastPt.x + (p.x - lastPt.x) * i / n, y: lastPt.y + (p.y - lastPt.y) * i / n };
+      st.pts.push(q);
+    }
+    lctx.save();
+    lctx.globalCompositeOperation = st.mode === 'eraser' ? 'destination-out' : 'source-over';
+    lctx.strokeStyle = st.color;
+    lctx.lineWidth = st.size;
+    lctx.lineCap = lctx.lineJoin = 'round';
+    lctx.beginPath();
+    lctx.moveTo(lastPt.x, lastPt.y);
+    lctx.lineTo(p.x, p.y);
+    lctx.stroke();
+    lctx.restore();
+    lastPt = p;
+    renderView();
+  }
+  function onUp() { drawing = false; lastPt = null; }
+
+  TOOLS.draw = {
+    title: 'Vẽ lên ảnh',
+    panel: `<div class="btns" style="margin-bottom:14px">
+        <button class="btn on" data-r="pen">✏️ Bút vẽ</button>
+        <button class="btn" data-r="eraser">🧽 Tẩy</button>
+      </div>
+      <div class="field">
+        <div class="lblrow"><span>Màu bút</span><input type="color" value="${color}" data-r="color"></div>
+      </div>
+      <div class="field">
+        <div class="lblrow"><span>Kích thước</span><span class="val" data-r="sizeV">${size}</span></div>
+        <input type="range" min="1" max="60" value="${size}" data-r="size">
+      </div>
+      <div class="btns">
+        <button class="btn reset-control" data-r="undo" disabled>↶ Hoàn tác</button>
+        <button class="btn reset-control" data-r="redo" disabled>↷ Làm lại</button>
+      </div>
+      <div class="btns" style="margin-top:8px">
+        <button class="btn reset-control" data-r="clear" disabled>🗑️ Xóa nét vẽ</button>
+      </div>
+      <p class="hint">Tẩy chỉ xóa nét bút đã vẽ, không làm hỏng ảnh gốc bên dưới.</p>
+      <div class="btns" style="margin-top:12px"><button class="btn primary" data-act="apply">Áp dụng</button></div>`,
+    init(el) {
+      els = {
+        pen: el.querySelector('[data-r="pen"]'),
+        eraser: el.querySelector('[data-r="eraser"]'),
+        color: el.querySelector('[data-r="color"]'),
+        size: el.querySelector('[data-r="size"]'),
+        sizeV: el.querySelector('[data-r="sizeV"]'),
+        undo: el.querySelector('[data-r="undo"]'),
+        redo: el.querySelector('[data-r="redo"]'),
+        clear: el.querySelector('[data-r="clear"]')
+      };
+      const setTool = t => {
+        drawTool = t;
+        els.pen.classList.toggle('on', t === 'pen');
+        els.eraser.classList.toggle('on', t === 'eraser');
+        $('#draw-ring').classList.toggle('eraser', t === 'eraser');
+      };
+      els.pen.onclick = () => setTool('pen');
+      els.eraser.onclick = () => setTool('eraser');
+      setTool(drawTool);
+      els.color.oninput = () => { color = els.color.value; };
+      els.size.oninput = () => { size = +els.size.value; els.sizeV.textContent = size; };
+      els.undo.onclick = () => TOOLS.draw.handleUndo();
+      els.redo.onclick = () => TOOLS.draw.handleRedo();
+      els.clear.onclick = () => {
+        if (!strokes.length) return;
+        redo = strokes.slice().reverse().concat(redo);
+        strokes = [];
+        replay(); renderView(); sync();
+      };
+      el.querySelector('[data-act="apply"]').onclick = () => TOOLS.draw.apply();
+    },
+    enter() {
+      base = App.canvas;
+      view = $('#view');
+      layer = newCanvas(base.width, base.height);
+      lctx = layer.getContext('2d');
+      strokes = []; redo = [];
+      renderView();
+      view.style.cursor = 'none';
+      view.addEventListener('pointerdown', onDown);
+      view.addEventListener('pointermove', onMove);
+      view.addEventListener('pointerup', onUp);
+      view.addEventListener('pointercancel', onUp);
+      view.addEventListener('pointerleave', () => { $('#draw-ring').style.display = 'none'; });
+      sync();
+    },
+    render() { renderView(); },
+    dirty() { return strokes.length > 0; },
+    discard() { strokes = []; redo = []; replay(); renderView(); sync(); },
+    handleUndo() {
+      if (!strokes.length) return false;
+      redo.push(strokes.pop());
+      replay(); renderView(); sync();
+      return true;
+    },
+    handleRedo() {
+      if (!redo.length) return false;
+      strokes.push(redo.pop());
+      replay(); renderView(); sync();
+      return false;  /* đã xử lý nội bộ */
+    },
+    leave() {
+      view.style.cursor = '';
+      view.removeEventListener('pointerdown', onDown);
+      view.removeEventListener('pointermove', onMove);
+      view.removeEventListener('pointerup', onUp);
+      view.removeEventListener('pointercancel', onUp);
+      $('#draw-ring').style.display = 'none';
+      els = null;
+    },
+    apply() {
+      if (!base || !strokes.length) { App.closeTool(); return; }
+      const c = newCanvas(base.width, base.height);
+      const x = c.getContext('2d');
+      x.imageSmoothingQuality = 'high';
+      x.drawImage(base, 0, 0);
+      x.drawImage(layer, 0, 0);
+      strokes = []; redo = [];
+      App.closeTool();
+      App.setCanvas(c);
+    }
+  };
+})();
+
+/* ----------------------------------------------------------- 7. THÊM CHỮ */
+(function () {
+  let base = null, view = null, items = [], sel = null, idc = 0, els = null, drag = null;
+  const D = { fs: 40, rot: 0, sw: 2 };
+
+  const cur = () => items.find(t => t.id === sel);
+
+  function scaleK() {
+    /* 1 đơn vị fs = 1px trên canvas hiển thị (#view), ảnh gốc được nhân theo tỉ lệ khi áp dụng */
+    const lw = $('#text-layer').clientWidth || view.width || 1;
+    return lw / (view.width || 1);
+  }
+
+  function drawItem(x, it, s) {
+    x.save();
+    x.translate(it.x / 100 * base.width, it.y / 100 * base.height);
+    x.rotate(it.rot * Math.PI / 180);
+    x.globalAlpha = it.op / 100;
+    const fs = it.fs * s;
+    x.font = it.weight + ' ' + fs + 'px ' + it.family;
+    x.textAlign = 'center';
+    x.textBaseline = 'middle';
+    const lines = String(it.text).split('\n');
+    const lh = fs * 1.2;
+    const y0 = -(lines.length - 1) * lh / 2;
+    lines.forEach((line, i) => {
+      if (it.stroke) {
+        x.lineWidth = it.sw * s;
+        x.strokeStyle = it.sc;
+        x.lineJoin = 'round';
+        x.strokeText(line, 0, y0 + i * lh);
+      }
+      x.fillStyle = it.color;
+      x.fillText(line, 0, y0 + i * lh);
+    });
+    x.restore();
+  }
+
+  function renderOverlay() {
+    const layer = $('#text-layer');
+    layer.innerHTML = '';
+    const k = scaleK();
+    items.forEach(it => {
+      const el = document.createElement('div');
+      el.className = 'dt' + (it.id === sel ? ' sel' : '');
+      el.textContent = it.text;
+      el.style.left = it.x + '%';
+      el.style.top = it.y + '%';
+      el.style.transform = 'translate(-50%,-50%) rotate(' + it.rot + 'deg)';
+      el.style.fontFamily = it.family;
+      el.style.fontSize = (it.fs * k) + 'px';
+      el.style.lineHeight = '1.2';
+      el.style.color = it.color;
+      el.style.fontWeight = it.weight;
+      el.style.opacity = it.op / 100;
+      el.style.webkitTextStroke = it.stroke ? (it.sw * k) + 'px ' + it.sc : '0px transparent';
+      el.dataset.id = it.id;
+      el.addEventListener('pointerdown', startDrag);
+      layer.appendChild(el);
     });
   }
-  function start(e){
-    e.preventDefault(); e.stopPropagation(); select(e.currentTarget.dataset.id); render();
-    drag={id:sel,rect:R.wrap.getBoundingClientRect()};
-    document.addEventListener('mousemove',move); document.addEventListener('touchmove',move,{passive:false});
-    document.addEventListener('mouseup',end); document.addEventListener('touchend',end);
+
+  function startDrag(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    sel = e.currentTarget.dataset.id;
+    selectUI();
+    renderOverlay();
+    const layer = $('#text-layer');
+    const rect = layer.getBoundingClientRect();
+    drag = { id: sel, rect: rect, el: e.currentTarget };
+    const move = ev => {
+      if (!drag) return;
+      ev.preventDefault();
+      const p = ev.touches ? ev.touches[0] : ev;
+      const it = items.find(t => t.id === drag.id);
+      if (!it) return;
+      it.x = clamp((p.clientX - rect.left) / rect.width * 100, 0, 100);
+      it.y = clamp((p.clientY - rect.top) / rect.height * 100, 0, 100);
+      drag.el.style.left = it.x + '%';
+      drag.el.style.top = it.y + '%';
+    };
+    const end = () => {
+      drag = null;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
   }
-  function move(e){
-    if(!drag) return; e.preventDefault(); const p=e.touches?e.touches[0]:e, r=drag.rect, it=items.find(t=>t.id===drag.id); if(!it) return;
-    it.x=Math.max(0,Math.min(100,(p.clientX-r.left)/r.width*100)); it.y=Math.max(0,Math.min(100,(p.clientY-r.top)/r.height*100)); render();
+
+  function selectUI() {
+    const it = cur();
+    if (!it) {
+      els.del.disabled = true;
+      els.props.classList.add('hidden');
+      return;
+    }
+    els.del.disabled = false;
+    els.props.classList.remove('hidden');
+    els.content.value = it.text;
+    els.family.value = it.family;
+    els.fs.value = it.fs; els.fsV.textContent = it.fs + 'px';
+    els.rot.value = it.rot; els.rotV.textContent = it.rot + '°';
+    els.color.value = it.color;
+    els.weight.value = it.weight;
+    els.stroke.checked = !!it.stroke;
+    els.strokeOpt.classList.toggle('hidden', !it.stroke);
+    els.strokeColor.value = it.sc;
+    els.sw.value = it.sw; els.swV.textContent = it.sw + 'px';
+    els.op.value = it.op; els.opV.textContent = it.op + '%';
   }
-  function end(){ drag=null; document.removeEventListener('mousemove',move); document.removeEventListener('touchmove',move); document.removeEventListener('mouseup',end); document.removeEventListener('touchend',end); }
-  R.wrap.addEventListener('click',()=>{ sel=null; R.panel.classList.add('hidden'); R.del.disabled=true; render(); });
-  window.addEventListener('resize',render);
+
+  const set = (k, v) => { const it = cur(); if (it) { it[k] = v; renderOverlay(); } };
+
+  TOOLS.text = {
+    title: 'Thêm chữ',
+    panel: `<div class="btns" style="margin-bottom:14px">
+        <button class="btn primary" data-r="add">➕ Thêm chữ</button>
+        <button class="btn reset-control" data-r="del" disabled>🗑️ Xóa chữ chọn</button>
+      </div>
+      <div class="hidden" data-r="props">
+        <div class="field"><label class="lbl">Nội dung</label><textarea rows="2" data-r="content" placeholder="Nhập chữ..."></textarea></div>
+        <div class="field"><label class="lbl">Font chữ</label>
+          <select data-r="family">
+            <option value="Arial, sans-serif">Arial</option>
+            <option value="'Times New Roman', serif">Times New Roman</option>
+            <option value="'Courier New', monospace">Courier New</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="Verdana, sans-serif">Verdana</option>
+            <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+            <option value="Impact, sans-serif">Impact</option>
+            <option value="'Brush Script MT', cursive">Brush Script MT</option>
+          </select>
+        </div>
+        <div class="two field">
+          <div><label class="lbl">Màu chữ</label><input type="color" value="#ffffff" data-r="color" style="width:100%"></div>
+          <div><label class="lbl">Độ đậm</label><select data-r="weight"><option value="normal">Thường</option><option value="bold" selected>Đậm</option></select></div>
+        </div>
+        <div class="field">
+          <div class="lblrow"><span>Cỡ chữ</span><span><span class="val" data-r="fsV">40px</span></span></div>
+          <input type="range" min="10" max="200" value="40" data-r="fs">
+          <button class="btn reset-control sm" data-r="fsR" style="margin-top:6px">↺ Đặt lại cỡ chữ</button>
+        </div>
+        <div class="field">
+          <div class="lblrow"><span>Xoay</span><span class="val" data-r="rotV">0°</span></div>
+          <input type="range" min="-180" max="180" value="0" data-r="rot">
+          <button class="btn reset-control sm" data-r="rotR" style="margin-top:6px">↺ Đặt lại xoay</button>
+        </div>
+        <label class="check"><input type="checkbox" data-r="stroke"> Viền chữ</label>
+        <div class="hidden" data-r="strokeOpt">
+          <div class="two field">
+            <div><label class="lbl">Màu viền</label><input type="color" value="#000000" data-r="strokeColor" style="width:100%"></div>
+            <div>
+              <div class="lblrow"><span>Độ dày</span><span class="val" data-r="swV">2px</span></div>
+              <input type="range" min="1" max="10" value="2" data-r="sw">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="lblrow"><span>Độ mờ</span><span class="val" data-r="opV">100%</span></div>
+          <input type="range" min="0" max="100" value="100" data-r="op">
+        </div>
+      </div>
+      <p class="hint">Kéo chữ trực tiếp trên ảnh để di chuyển, chạm vào chữ để chọn và chỉnh sửa.</p>
+      <div class="btns" style="margin-top:12px"><button class="btn primary" data-act="apply">Áp dụng</button></div>`,
+    init(el) {
+      els = {
+        add: el.querySelector('[data-r="add"]'),
+        del: el.querySelector('[data-r="del"]'),
+        props: el.querySelector('[data-r="props"]'),
+        content: el.querySelector('[data-r="content"]'),
+        family: el.querySelector('[data-r="family"]'),
+        color: el.querySelector('[data-r="color"]'),
+        weight: el.querySelector('[data-r="weight"]'),
+        fs: el.querySelector('[data-r="fs"]'), fsV: el.querySelector('[data-r="fsV"]'), fsR: el.querySelector('[data-r="fsR"]'),
+        rot: el.querySelector('[data-r="rot"]'), rotV: el.querySelector('[data-r="rotV"]'), rotR: el.querySelector('[data-r="rotR"]'),
+        stroke: el.querySelector('[data-r="stroke"]'),
+        strokeOpt: el.querySelector('[data-r="strokeOpt"]'),
+        strokeColor: el.querySelector('[data-r="strokeColor"]'),
+        sw: el.querySelector('[data-r="sw"]'), swV: el.querySelector('[data-r="swV"]'),
+        op: el.querySelector('[data-r="op"]'), opV: el.querySelector('[data-r="opV"]')
+      };
+      els.add.onclick = () => {
+        const it = {
+          id: 't' + (idc++), text: 'Chữ của bạn', x: 50, y: 50,
+          family: 'Arial, sans-serif', fs: D.fs, color: '#ffffff', weight: 'bold',
+          rot: 0, stroke: false, sc: '#000000', sw: D.sw, op: 100
+        };
+        items.push(it);
+        sel = it.id;
+        selectUI(); renderOverlay();
+      };
+      els.del.onclick = () => {
+        if (!sel) return;
+        items = items.filter(t => t.id !== sel);
+        sel = null;
+        selectUI(); renderOverlay();
+      };
+      els.content.oninput = e => set('text', e.target.value);
+      els.family.onchange = e => set('family', e.target.value);
+      els.color.oninput = e => set('color', e.target.value);
+      els.weight.onchange = e => set('weight', e.target.value);
+      els.fs.oninput = e => { els.fsV.textContent = e.target.value + 'px'; set('fs', +e.target.value); };
+      els.rot.oninput = e => { els.rotV.textContent = e.target.value + '°'; set('rot', +e.target.value); };
+      els.stroke.onchange = e => { els.strokeOpt.classList.toggle('hidden', !e.target.checked); set('stroke', e.target.checked); };
+      els.strokeColor.oninput = e => set('sc', e.target.value);
+      els.sw.oninput = e => { els.swV.textContent = e.target.value + 'px'; set('sw', +e.target.value); };
+      els.op.oninput = e => { els.opV.textContent = e.target.value + '%'; set('op', +e.target.value); };
+      els.fsR.onclick = () => { els.fs.value = D.fs; els.fsV.textContent = D.fs + 'px'; set('fs', D.fs); };
+      els.rotR.onclick = () => { els.rot.value = 0; els.rotV.textContent = '0°'; set('rot', 0); };
+      el.querySelector('[data-act="apply"]').onclick = () => TOOLS.text.apply();
+    },
+    enter() {
+      base = App.canvas;
+      view = $('#view');
+      items = []; sel = null;
+      const layer = $('#text-layer');
+      layer.classList.add('on');
+      layer.innerHTML = '';
+      layer.onpointerdown = e => {
+        if (e.target === layer) { sel = null; selectUI(); renderOverlay(); }
+      };
+      renderOverlay();
+      selectUI();
+    },
+    render() {
+      if (!base) return;
+      const s = Math.min(1, VIEW_MAX / Math.max(base.width, base.height));
+      view.width = Math.round(base.width * s);
+      view.height = Math.round(base.height * s);
+      const x = view.getContext('2d');
+      x.clearRect(0, 0, view.width, view.height);
+      x.imageSmoothingQuality = 'high';
+      x.drawImage(base, 0, 0, view.width, view.height);
+      if (items.length) renderOverlay();
+    },
+    dirty() { return !!(base && items.length); },
+    discard() { items = []; sel = null; selectUI(); renderOverlay(); },
+    leave() {
+      const layer = $('#text-layer');
+      layer.classList.remove('on');
+      layer.onpointerdown = null;
+      layer.innerHTML = '';
+      els = null;
+    },
+    apply() {
+      if (!base || !items.length) { App.closeTool(); return; }
+      const o = copyCanvas(base);
+      const x = o.getContext('2d');
+      const s = o.width / view.width;
+      items.forEach(it => drawItem(x, it, s));
+      items = []; sel = null;
+      App.closeTool();
+      App.setCanvas(o);
+    }
+  };
 })();
 
+/* --- vẽ lại overlay chữ khi đổi kích thước cửa sổ --- */
+/* cho phép kiểm thử / debug từ console */
+if (typeof window !== 'undefined') { window.App = App; window.TOOLS = TOOLS; window.filterCanvas = filterCanvas; }
+
+window.addEventListener('resize', () => {
+  if (App.activeId === 'text' && App.activeTool && App.activeTool.render) App.activeTool.render();
+});
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
