@@ -35,7 +35,22 @@
 
   .container { max-width: 1080px; margin: 0 auto; }
 
-  header { margin-bottom: 32px; }
+  header {
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .btn.btn-header { width: auto; flex-shrink: 0; padding: 9px 16px; }
+
+  .divider {
+    height: 1px;
+    background: var(--line);
+    margin: 6px 0;
+  }
 
   h1 {
     font-size: 22px;
@@ -65,8 +80,9 @@
   }
 
   .image-section {
-    padding: 14px;
-    min-height: 420px;
+    padding: 36px;
+    height: min(600px, 75vh);
+    min-height: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -78,7 +94,7 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 14px;
     align-self: start;
   }
 
@@ -102,15 +118,13 @@
 
   #fileInput { display: none; }
 
-  .image-wrapper { display: none; width: 100%; }
+  /* Khung chỉnh sửa có kích thước cố định, ảnh tự co giãn vừa khung */
+  .image-wrapper { display: none; width: 100%; height: 100%; }
   .image-wrapper.active { display: block; }
 
   #image {
     max-width: 100%;
-    max-height: 560px;
     display: block;
-    border-radius: 6px;
-    margin: 0 auto;
   }
 
   .control-title {
@@ -146,52 +160,11 @@
   .btn-primary:hover { border-color: var(--accent); opacity: 0.92; }
   .btn-secondary { color: var(--text-dim); }
 
-  .result-section { display: none; margin-top: 24px; }
-  .result-section.active { display: block; }
-
-  .result-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 14px;
-  }
-
-  .result-content {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-  }
-
-  .result-content img {
-    max-width: 100%;
-    max-height: 560px;
-    border-radius: 6px;
-    margin-bottom: 16px;
-  }
-
-  .download-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
-    background: var(--accent);
-    color: var(--accent-ink);
-    text-decoration: none;
-    border-radius: 7px;
-    font-weight: 600;
-    font-size: 13.5px;
-    transition: opacity 0.15s ease;
-  }
-
-  .download-link:hover { opacity: 0.92; }
-
   .stats {
     background: var(--panel-2);
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 4px 14px;
-    margin-top: 12px;
     text-align: left;
   }
 
@@ -215,15 +188,22 @@
   .cropper-line,
   .cropper-point { background-color: var(--accent); }
 
-  .cropper-point { width: 8px; height: 8px; opacity: 0.8; }
-  .cropper-point.point-se { width: 12px; height: 12px; }
+  .cropper-point { width: 10px; height: 10px; opacity: 0.9; }
+  .cropper-point.point-se { width: 14px; height: 14px; }
+
+  /* Cho phép tay cầm nhô ra ngoài mép ảnh mà không bị cắt */
+  .image-section, .image-wrapper, .cropper-container { overflow: visible; }
+  .image-section { overflow: hidden; }
 </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>✂️ Cắt ảnh online miễn phí</h1>
-            <p class="subtitle">Công cụ chỉnh sửa ảnh chuyên nghiệp</p>
+            <div>
+                <h1>✂️ Cắt ảnh online miễn phí</h1>
+                <p class="subtitle">Công cụ chỉnh sửa ảnh chuyên nghiệp</p>
+            </div>
+            <button class="btn btn-secondary btn-header" id="newBtn" disabled>📁 Mở ảnh khác</button>
         </header>
 
         <div class="main-grid">
@@ -243,35 +223,30 @@
             <div class="controls">
                 <div class="control-group">
                     <div class="control-title">Thao tác</div>
-                    <button class="btn btn-primary" id="cropBtn" disabled>
-                        <span>✂️ Cắt ảnh</span>
-                    </button>
                 </div>
 
-                <div class="control-group">
-                    <button class="btn btn-secondary" id="resetBtn" disabled>
-                        <span>🔄 Đặt lại</span>
-                    </button>
-                </div>
+                <button class="btn" id="cropBtn" disabled>✂️ Cắt</button>
+                <button class="btn" id="undoBtn" disabled>↩️ Hoàn tác</button>
+                <button class="btn btn-secondary" id="resetBtn" disabled>🔄 Đặt lại từ đầu</button>
 
-                <div class="control-group">
-                    <div class="stats" id="imageStats" style="display: none;">
-                        <div class="stat-item">
-                            <span class="stat-label">Kích thước gốc</span>
-                            <span class="stat-value" id="originalSize">-</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Trạng thái</span>
-                            <span class="stat-value" id="status">Chờ tải ảnh</span>
-                        </div>
+                <div class="stats" id="imageStats" style="display: none;">
+                    <div class="stat-item">
+                        <span class="stat-label">Kích thước ảnh</span>
+                        <span class="stat-value" id="originalSize">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Vùng chọn</span>
+                        <span class="stat-value" id="cropSize">-</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Trạng thái</span>
+                        <span class="stat-value" id="status">Chờ tải ảnh</span>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="result-section" id="resultSection">
-            <h2 class="result-title">✨ Kết quả</h2>
-            <div class="result-content" id="result"></div>
+                <div class="divider"></div>
+                <button class="btn btn-primary" id="downloadBtn" disabled>💾 Tải ảnh xuống</button>
+            </div>
         </div>
     </div>
 
@@ -281,21 +256,32 @@
         const uploadArea = document.getElementById('uploadArea');
         const imageWrapper = document.getElementById('imageWrapper');
         const image = document.getElementById('image');
+        const downloadBtn = document.getElementById('downloadBtn');
         const cropBtn = document.getElementById('cropBtn');
         const resetBtn = document.getElementById('resetBtn');
-        const resultSection = document.getElementById('resultSection');
-        const result = document.getElementById('result');
+        const undoBtn = document.getElementById('undoBtn');
+        const newBtn = document.getElementById('newBtn');
         const imageStats = document.getElementById('imageStats');
         const originalSize = document.getElementById('originalSize');
+        const cropSize = document.getElementById('cropSize');
         const status = document.getElementById('status');
 
-        let cropper;
-        let originalImageData;
+        let cropper = null;
+        let originalImageData = null;
+        let currentImageData = null;
+        let history = []; // các phiên bản ảnh trước đó, dùng cho Hoàn tác
 
-        // Upload area click
+        const CANVAS_OPTIONS = {
+            maxWidth: 4096,
+            maxHeight: 4096,
+            fillColor: '#fff',
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        };
+
         uploadArea.addEventListener('click', () => fileInput.click());
+        newBtn.addEventListener('click', () => { fileInput.value = ''; fileInput.click(); });
 
-        // Drag and drop
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.style.borderColor = 'var(--accent)';
@@ -312,105 +298,123 @@
             uploadArea.style.borderColor = '';
             uploadArea.style.background = '';
             const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-                loadImage(file);
-            }
+            if (file && file.type.startsWith('image/')) loadImage(file);
         });
 
-        // File input change
         fileInput.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) {
-                loadImage(e.target.files[0]);
-            }
+            if (e.target.files && e.target.files[0]) loadImage(e.target.files[0]);
         });
 
         function loadImage(file) {
             const reader = new FileReader();
             reader.onload = (event) => {
                 originalImageData = event.target.result;
-                image.src = originalImageData;
-                
-                uploadArea.classList.add('has-image');
-                imageWrapper.classList.add('active');
-                
-                if (cropper) {
-                    cropper.destroy();
-                }
-                
-                cropper = new Cropper(image, {
-                    aspectRatio: NaN,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.8,
-                    restore: false,
-                    guides: true,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false,
-                    responsive: true,
-                    ready: function() {
-                        const imgData = cropper.getImageData();
-                        originalSize.textContent = `${Math.round(imgData.naturalWidth)} × ${Math.round(imgData.naturalHeight)} px`;
-                        status.textContent = 'Sẵn sàng cắt';
-                        imageStats.style.display = 'block';
-                    }
-                });
-                
-                cropBtn.disabled = false;
-                resetBtn.disabled = false;
-                resultSection.classList.remove('active');
+                history = [];
+                initCropper(originalImageData, 'Sẵn sàng chỉnh sửa');
             };
             reader.readAsDataURL(file);
         }
 
-        cropBtn.addEventListener('click', () => {
+        // Luôn dùng chung một khung chỉnh sửa duy nhất
+        function initCropper(src, statusText) {
             if (cropper) {
-                const croppedCanvas = cropper.getCroppedCanvas({
-                    maxWidth: 4096,
-                    maxHeight: 4096,
-                    fillColor: '#fff',
-                    imageSmoothingEnabled: true,
-                    imageSmoothingQuality: 'high',
-                });
-                
-                const croppedImage = croppedCanvas.toDataURL('image/png');
-                
-                result.innerHTML = `
-                    <img src="${croppedImage}" alt="Ảnh đã cắt">
-                    <div class="stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Kích thước mới</span>
-                            <span class="stat-value">${croppedCanvas.width} × ${croppedCanvas.height} px</span>
-                        </div>
-                    </div>
-                    <br>
-                    <a href="${croppedImage}" download="anh-da-cat.png" class="download-link">
-                        💾 Tải xuống ảnh
-                    </a>
-                `;
-                
-                resultSection.classList.add('active');
-                
-                // Smooth scroll to result
-                setTimeout(() => {
-                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-                
-                status.textContent = 'Đã cắt xong';
+                cropper.destroy();
+                cropper = null;
             }
+
+            currentImageData = src;
+            image.src = src;
+            uploadArea.classList.add('has-image');
+            imageWrapper.classList.add('active');
+
+            cropper = new Cropper(image, {
+                aspectRatio: NaN,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 1,
+                restore: false,
+                guides: true,
+                center: true,
+                highlight: false,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: false,
+                responsive: true,
+                ready: function () {
+                    fitImageWithMargin();
+                    const imgData = cropper.getImageData();
+                    originalSize.textContent = `${Math.round(imgData.naturalWidth)} × ${Math.round(imgData.naturalHeight)} px`;
+                    status.textContent = statusText;
+                    imageStats.style.display = 'block';
+                    updateCropSize();
+                },
+                crop: updateCropSize
+            });
+
+            downloadBtn.disabled = false;
+            cropBtn.disabled = false;
+            resetBtn.disabled = false;
+            newBtn.disabled = false;
+            undoBtn.disabled = history.length === 0;
+        }
+
+        // Thu nhỏ ảnh vào giữa khung, chừa khoảng trống ở cả 4 mép
+        function fitImageWithMargin() {
+            const MARGIN = 32;
+            const container = cropper.getContainerData();
+            const img = cropper.getImageData();
+            const scale = Math.min(
+                (container.width - MARGIN * 2) / img.naturalWidth,
+                (container.height - MARGIN * 2) / img.naturalHeight
+            );
+            const w = img.naturalWidth * scale;
+            const h = img.naturalHeight * scale;
+            const left = (container.width - w) / 2;
+            const top = (container.height - h) / 2;
+            cropper.setCanvasData({ left, top, width: w, height: h });
+            cropper.setCropBoxData({ left, top, width: w, height: h });
+        }
+
+        function updateCropSize() {
+            if (!cropper) return;
+            const d = cropper.getData(true);
+            cropSize.textContent = `${d.width} × ${d.height} px`;
+        }
+
+        // Áp dụng cắt ngay trong khung, không hiện thêm phần kết quả
+        cropBtn.addEventListener('click', () => {
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas(CANVAS_OPTIONS);
+            history.push(currentImageData);
+            initCropper(canvas.toDataURL('image/png'), 'Đã cắt, có thể chỉnh tiếp');
+        });
+
+        undoBtn.addEventListener('click', () => {
+            if (history.length === 0) return;
+            initCropper(history.pop(), 'Đã hoàn tác');
+        });
+
+        // Tải xuống đúng vùng đang chọn trong khung
+        downloadBtn.addEventListener('click', () => {
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas(CANVAS_OPTIONS);
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'anh-da-cat.png';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                status.textContent = 'Đã tải xuống';
+            }, 'image/png');
         });
 
         resetBtn.addEventListener('click', () => {
-            if (cropper) {
-                cropper.reset();
-                resultSection.classList.remove('active');
-                status.textContent = 'Đã đặt lại';
-                setTimeout(() => {
-                    status.textContent = 'Sẵn sàng cắt';
-                }, 2000);
-            }
+            if (!originalImageData || currentImageData === originalImageData) return;
+            history.push(currentImageData); // đặt lại cũng có thể hoàn tác
+            initCropper(originalImageData, 'Đã đặt lại ảnh gốc');
         });
     </script>
 </body>
