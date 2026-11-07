@@ -629,16 +629,22 @@
   function startDrag(e){
     e.preventDefault();
     e.stopPropagation();
-    const id = e.currentTarget.dataset.id;
+    const el = e.currentTarget;
+    const id = el.dataset.id;
     selectItem(id);
-    renderTextLayer();
-    const item = getSelected();
+    // Chỉ đổi viền chọn tại chỗ, KHÔNG dựng lại phần tử chữ đang bị chạm.
+    // Trên điện thoại, nếu phần tử bị gỡ khỏi trang giữa lúc đang chạm thì các
+    // sự kiện kéo (touchmove) sẽ ngừng được gửi tới, nên chữ không di chuyển được.
+    textLayer.querySelectorAll('.draggable-text').forEach(node => {
+      node.classList.toggle('selected', node.dataset.id === id);
+    });
     const rect = canvasWrap.getBoundingClientRect();
-    dragState = { id, rect };
+    dragState = { id, rect, el };
     document.addEventListener('mousemove', onDrag);
     document.addEventListener('touchmove', onDrag, {passive:false});
     document.addEventListener('mouseup', endDrag);
     document.addEventListener('touchend', endDrag);
+    document.addEventListener('touchcancel', endDrag);
   }
 
   function onDrag(e){
@@ -654,7 +660,9 @@
     if(item){
       item.x = x;
       item.y = y;
-      renderTextLayer();
+      // Cập nhật vị trí trực tiếp trên phần tử đang kéo, không dựng lại cả lớp chữ
+      dragState.el.style.left = x + '%';
+      dragState.el.style.top = y + '%';
     }
   }
 
@@ -664,6 +672,7 @@
     document.removeEventListener('touchmove', onDrag);
     document.removeEventListener('mouseup', endDrag);
     document.removeEventListener('touchend', endDrag);
+    document.removeEventListener('touchcancel', endDrag);
   }
 
   textLayer.addEventListener('click', ()=>{
